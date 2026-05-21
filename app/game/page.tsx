@@ -1,17 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { projects, type ProjectOption } from "@/data/projects";
+import {
+  careerLevels,
+  defaultProgress,
+  getProgress,
+  saveGameProgress,
+} from "@/progressStorage";
 
 const project = projects[0];
-
-const careerLevels = [
-  "Junior Project Coordinator",
-  "Assistant Project Manager",
-  "Project Manager",
-  "Senior Project Manager",
-];
 
 type CareerResult = "Terfi" | "Stabil" | "Görevin Azalması";
 
@@ -73,11 +72,23 @@ export default function GamePage() {
   );
   const [totalScore, setTotalScore] = useState(0);
   const [showResults, setShowResults] = useState(false);
-  const [careerLevel, setCareerLevel] = useState(0);
+  const [careerLevel, setCareerLevel] = useState(
+    defaultProgress.careerLevelIndex,
+  );
   const [gameResult, setGameResult] = useState<GameResult | null>(null);
 
   const round = project.rounds[roundIndex];
   const isLastRound = roundIndex === project.rounds.length - 1;
+
+  useEffect(() => {
+    const loadProgress = window.setTimeout(() => {
+      setCareerLevel(getProgress().careerLevelIndex);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(loadProgress);
+    };
+  }, []);
 
   function chooseOption(option: ProjectOption) {
     if (selectedOption) {
@@ -97,6 +108,7 @@ export default function GamePage() {
     const result = getResultForScore(totalScore, careerLevel);
     const nextCareerLevel = careerLevels.indexOf(result.newTitle);
 
+    saveGameProgress(result.earnedXp, nextCareerLevel);
     setCareerLevel(nextCareerLevel);
     setGameResult(result);
     setShowResults(true);

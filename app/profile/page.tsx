@@ -1,59 +1,31 @@
 "use client";
 
 import Link from "next/link";
-import { useSyncExternalStore } from "react";
-
-const storageKey = "project-pulse-profile";
-
-type ProfileStats = {
-  totalXp: number;
-  completedProjects: number;
-};
-
-const defaultStats: ProfileStats = {
-  totalXp: 0,
-  completedProjects: 0,
-};
-
-function subscribeToStorage(callback: () => void) {
-  window.addEventListener("storage", callback);
-
-  return () => {
-    window.removeEventListener("storage", callback);
-  };
-}
-
-function getStoredStats() {
-  return window.localStorage.getItem(storageKey) ?? JSON.stringify(defaultStats);
-}
-
-function getServerStats() {
-  return JSON.stringify(defaultStats);
-}
-
-function parseStats(stats: string): ProfileStats {
-  return JSON.parse(stats) as ProfileStats;
-}
-
-function getTitle(totalXp: number) {
-  if (totalXp >= 180) {
-    return "Proje Lideri";
-  }
-
-  if (totalXp >= 90) {
-    return "Takım Koordinatörü";
-  }
-
-  return "Junior Project Manager";
-}
+import { useEffect, useState } from "react";
+import {
+  careerLevels,
+  defaultProgress,
+  getProgress,
+  resetProgress,
+  type ProgressData,
+} from "@/progressStorage";
 
 export default function ProfilePage() {
-  const statsSnapshot = useSyncExternalStore(
-    subscribeToStorage,
-    getStoredStats,
-    getServerStats,
-  );
-  const stats = parseStats(statsSnapshot);
+  const [progress, setProgress] = useState<ProgressData>(defaultProgress);
+
+  useEffect(() => {
+    const loadProgress = window.setTimeout(() => {
+      setProgress(getProgress());
+    }, 0);
+
+    return () => {
+      window.clearTimeout(loadProgress);
+    };
+  }, []);
+
+  function handleResetProgress() {
+    setProgress(resetProgress());
+  }
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-100 px-6 py-10 text-slate-950">
@@ -63,24 +35,26 @@ export default function ProfilePage() {
         </Link>
         <h1 className="mt-4 text-3xl font-bold">Profil</h1>
         <p className="mt-2 text-slate-600">
-          Project Pulse ilerlemen bu cihazda saklanır.
+          Project Pulse ilerlemen bu cihazda saklanir.
         </p>
 
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
             <p className="text-sm font-medium text-slate-500">Mevcut unvan</p>
-            <p className="mt-2 text-xl font-bold">{getTitle(stats.totalXp)}</p>
+            <p className="mt-2 text-xl font-bold">
+              {careerLevels[progress.careerLevelIndex]}
+            </p>
           </div>
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
             <p className="text-sm font-medium text-slate-500">Toplam XP</p>
-            <p className="mt-2 text-3xl font-bold">{stats.totalXp}</p>
+            <p className="mt-2 text-3xl font-bold">{progress.totalXp}</p>
           </div>
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
             <p className="text-sm font-medium text-slate-500">
               Tamamlanan proje
             </p>
             <p className="mt-2 text-3xl font-bold">
-              {stats.completedProjects}
+              {progress.completedProjects}
             </p>
           </div>
         </div>
@@ -92,6 +66,13 @@ export default function ProfilePage() {
           >
             Oyuna Devam Et
           </Link>
+          <button
+            type="button"
+            onClick={handleResetProgress}
+            className="inline-flex h-12 items-center justify-center rounded-md border border-red-200 px-6 font-semibold text-red-700 transition-colors hover:bg-red-50"
+          >
+            İlerlemeyi Sıfırla
+          </button>
           <Link
             href="/"
             className="inline-flex h-12 items-center justify-center rounded-md border border-slate-300 px-6 font-semibold text-slate-700 transition-colors hover:bg-slate-50"
