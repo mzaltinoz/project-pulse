@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { createClient, hasSupabaseConfig } from "@/lib/supabase/client";
 
 type LoginForm = {
   email: string;
@@ -16,6 +17,7 @@ export default function LoginPage() {
     password: "",
   });
   const [error, setError] = useState("");
+  const isSupabaseConfigured = hasSupabaseConfig();
 
   function updateField(field: keyof LoginForm, value: string) {
     setForm((currentForm) => ({
@@ -38,6 +40,27 @@ export default function LoginPage() {
 
   function continueAsDemo() {
     router.push("/game");
+  }
+
+  async function continueWithGoogle() {
+    const supabase = createClient();
+
+    if (!supabase) {
+      setError("Supabase configuration missing");
+      return;
+    }
+
+    const redirectTo = `${window.location.origin}/auth/callback`;
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo,
+      },
+    });
+
+    if (oauthError) {
+      setError(oauthError.message);
+    }
   }
 
   return (
@@ -83,6 +106,20 @@ export default function LoginPage() {
             Giriş Yap
           </button>
         </form>
+
+        {!isSupabaseConfigured ? (
+          <p className="mt-4 rounded-md border border-amber-300/30 bg-amber-300/10 p-3 text-sm font-medium text-amber-100">
+            Supabase configuration missing
+          </p>
+        ) : null}
+
+        <button
+          type="button"
+          onClick={continueWithGoogle}
+          className="mt-3 inline-flex h-12 w-full items-center justify-center rounded-md border border-cyan-300/30 bg-cyan-300/10 px-6 font-semibold text-cyan-100 transition-colors hover:bg-cyan-300/20"
+        >
+          Continue with Google
+        </button>
 
         <button
           type="button"

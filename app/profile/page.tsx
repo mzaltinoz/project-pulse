@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import type { User } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
 import { CareerAvatar } from "@/components/CareerAvatar";
+import { createClient } from "@/lib/supabase/client";
 import {
   careerLevels,
   defaultProgress,
@@ -33,6 +35,7 @@ function getManagementStyle(earnedBadges?: string[]) {
 
 export default function ProfilePage() {
   const [progress, setProgress] = useState<ProgressData>(defaultProgress);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     const loadProgress = window.setTimeout(() => {
@@ -41,6 +44,33 @@ export default function ProfilePage() {
 
     return () => {
       window.clearTimeout(loadProgress);
+    };
+  }, []);
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    if (!supabase) {
+      return;
+    }
+
+    let isMounted = true;
+
+    supabase.auth.getUser().then(({ data }) => {
+      if (isMounted) {
+        setUser(data.user);
+      }
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
     };
   }, []);
 
@@ -64,6 +94,14 @@ export default function ProfilePage() {
             <p className="mt-2 text-slate-300">
               Project Pulse ilerlemen bu cihazda saklanır.
             </p>
+            {user ? (
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <span className="rounded-full border border-emerald-300/30 bg-emerald-300/10 px-3 py-1 text-xs font-bold text-emerald-200">
+                  Connected Account
+                </span>
+                <span className="text-sm text-slate-300">{user.email}</span>
+              </div>
+            ) : null}
           </div>
           <CareerAvatar careerLevelIndex={progress.careerLevelIndex} size="lg" />
         </div>
