@@ -6,6 +6,10 @@ import { useEffect, useState } from "react";
 import { CareerAvatar } from "@/components/CareerAvatar";
 import { createClient } from "@/lib/supabase/client";
 import {
+  getOrCreateProfile,
+  profileToProgress,
+} from "@/lib/supabase/profileService";
+import {
   careerLevels,
   defaultProgress,
   getProgress,
@@ -36,6 +40,8 @@ function getManagementStyle(earnedBadges?: string[]) {
 export default function ProfilePage() {
   const [progress, setProgress] = useState<ProgressData>(defaultProgress);
   const [user, setUser] = useState<User | null>(null);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [profileError, setProfileError] = useState("");
 
   useEffect(() => {
     const loadProgress = window.setTimeout(() => {
@@ -54,18 +60,45 @@ export default function ProfilePage() {
       return;
     }
 
+    const supabaseClient = supabase;
     let isMounted = true;
 
-    supabase.auth.getUser().then(({ data }) => {
+    async function loadCloudProfile(currentUser: User) {
+      setProfileLoading(true);
+      setProfileError("");
+
+      try {
+        const profile = await getOrCreateProfile(supabaseClient, currentUser);
+        if (isMounted) {
+          setProgress(profileToProgress(profile));
+        }
+      } catch {
+        if (isMounted) {
+          setProfileError("Could not load cloud profile.");
+        }
+      } finally {
+        if (isMounted) {
+          setProfileLoading(false);
+        }
+      }
+    }
+
+    supabaseClient.auth.getUser().then(({ data }) => {
       if (isMounted) {
         setUser(data.user);
+        if (data.user) {
+          void loadCloudProfile(data.user);
+        }
       }
     });
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabaseClient.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        void loadCloudProfile(session.user);
+      }
     });
 
     return () => {
@@ -101,6 +134,16 @@ export default function ProfilePage() {
                 </span>
                 <span className="text-sm text-slate-300">{user.email}</span>
               </div>
+            ) : null}
+            {profileLoading ? (
+              <p className="mt-4 text-sm font-medium text-slate-300">
+                Loading profile...
+              </p>
+            ) : null}
+            {profileError ? (
+              <p className="mt-4 rounded-md border border-red-300/30 bg-red-500/10 p-3 text-sm font-medium text-red-200">
+                {profileError}
+              </p>
             ) : null}
           </div>
           <CareerAvatar careerLevelIndex={progress.careerLevelIndex} size="lg" />

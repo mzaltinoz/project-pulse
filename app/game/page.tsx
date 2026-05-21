@@ -1,5 +1,6 @@
 "use client";
 
+import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { CareerAvatar } from "@/components/CareerAvatar";
@@ -10,6 +11,12 @@ import {
   type ProjectMethodology,
   type ProjectOption,
 } from "@/data/projects";
+import { createClient } from "@/lib/supabase/client";
+import {
+  getOrCreateProfile,
+  updateProfileProgress,
+} from "@/lib/supabase/profileService";
+import { insertUserProgress } from "@/lib/supabase/progressService";
 import { clampMetric, initialMetrics, type MetricScores } from "@/metrics";
 import {
   type BadgeName,
@@ -176,6 +183,8 @@ export default function GamePage() {
   );
   const [gameResult, setGameResult] = useState<GameResult | null>(null);
   const [metrics, setMetrics] = useState<MetricScores>(initialMetrics);
+  const [user, setUser] = useState<User | null>(null);
+  const [cloudError, setCloudError] = useState("");
 
   const currentProject =
     projects.find((project) => project.id === selectedProjectId) ?? projects[0];
@@ -192,6 +201,49 @@ export default function GamePage() {
     };
   }, []);
 
+  useEffect(() => {
+    const supabase = createClient();
+
+    if (!supabase) {
+      return;
+    }
+
+    const supabaseClient = supabase;
+    let isMounted = true;
+
+    supabaseClient.auth.getUser().then(async ({ data }) => {
+      if (!isMounted) {
+        return;
+      }
+
+      setUser(data.user);
+
+      if (data.user) {
+        try {
+          const profile = await getOrCreateProfile(supabaseClient, data.user);
+          if (isMounted) {
+            setCareerLevel(profile.career_level_index);
+          }
+        } catch {
+          if (isMounted) {
+            setCloudError("Could not load cloud profile.");
+          }
+        }
+      }
+    });
+
+    const {
+      data: { subscription },
+    } = supabaseClient.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
   function resetGameState(project: Project) {
     setSelectedProjectId(project.id);
     setRoundIndex(0);
@@ -200,6 +252,7 @@ export default function GamePage() {
     setShowResults(false);
     setGameResult(null);
     setMetrics(initialMetrics);
+    setCloudError("");
   }
 
   function startProject(project: Project) {
@@ -222,7 +275,7 @@ export default function GamePage() {
     setSelectedOption(null);
   }
 
-  function showResultScreen() {
+  async function showResultScreen() {
     const baseResult = getResultForScore(totalScore, careerLevel);
     const nextCareerLevel = careerLevels.indexOf(baseResult.newTitle);
     const earnedBadges = getEarnedBadges(
@@ -231,14 +284,48 @@ export default function GamePage() {
       totalScore,
       metrics,
     );
-    const savedProgress = saveGameProgress(
-      baseResult.earnedXp,
-      nextCareerLevel,
-      earnedBadges,
-    );
+    let newBadges: BadgeName[] = [];
+
+    if (user) {
+      const supabase = createClient();
+
+      if (supabase) {
+        try {
+          await getOrCreateProfile(supabase, user);
+          const savedProgress = await updateProfileProgress(supabase, user.id, {
+            earnedXp: baseResult.earnedXp,
+            careerLevelIndex: nextCareerLevel,
+            earnedBadges,
+          });
+
+          await insertUserProgress(supabase, {
+            user_id: user.id,
+            project_id: currentProject.id,
+            project_title: currentProject.title,
+            methodology: currentProject.methodology,
+            stars: baseResult.stars,
+            xp_earned: baseResult.earnedXp,
+            result: baseResult.careerResult,
+            final_score: totalScore,
+          });
+
+          newBadges = savedProgress.newBadges;
+        } catch {
+          setCloudError("Could not save cloud progress.");
+        }
+      }
+    } else {
+      const savedProgress = saveGameProgress(
+        baseResult.earnedXp,
+        nextCareerLevel,
+        earnedBadges,
+      );
+      newBadges = savedProgress.newBadges;
+    }
+
     const result = {
       ...baseResult,
-      newBadges: savedProgress.newBadges,
+      newBadges,
     };
 
     setCareerLevel(nextCareerLevel);
@@ -414,6 +501,11 @@ export default function GamePage() {
         ) : null}
 
         <section className="rounded-lg border border-white/10 bg-slate-900/70 p-6 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10">
+          {cloudError ? (
+            <p className="mb-4 rounded-md border border-red-300/30 bg-red-500/10 p-3 text-sm font-medium text-red-200">
+              {cloudError}
+            </p>
+          ) : null}
           <p className="leading-7 text-slate-300">{gameResult.feedback}</p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             <Link
