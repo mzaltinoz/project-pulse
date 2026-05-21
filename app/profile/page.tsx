@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { CareerAvatar } from "@/components/CareerAvatar";
 import {
   careerLevels,
   defaultProgress,
@@ -28,59 +29,68 @@ export default function ProfilePage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-100 px-6 py-10 text-slate-950">
-      <section className="w-full max-w-2xl rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-        <Link href="/" className="text-sm font-medium text-cyan-700">
-          Ana sayfa
-        </Link>
-        <h1 className="mt-4 text-3xl font-bold">Profil</h1>
-        <p className="mt-2 text-slate-600">
-          Project Pulse ilerlemen bu cihazda saklanir.
-        </p>
-
-        <div className="mt-6 grid gap-4 sm:grid-cols-3">
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-            <p className="text-sm font-medium text-slate-500">Mevcut unvan</p>
-            <p className="mt-2 text-xl font-bold">
-              {careerLevels[progress.careerLevelIndex]}
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
+      <section className="rounded-lg border border-white/10 bg-slate-900/70 p-6 shadow-2xl shadow-cyan-950/30 ring-1 ring-cyan-300/10">
+        <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-sm font-medium uppercase tracking-wide text-cyan-300">
+              Profile
+            </p>
+            <h1 className="mt-2 text-3xl font-bold text-white">Profil</h1>
+            <p className="mt-2 text-slate-300">
+              Project Pulse ilerlemen bu cihazda saklanır.
             </p>
           </div>
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-            <p className="text-sm font-medium text-slate-500">Toplam XP</p>
-            <p className="mt-2 text-3xl font-bold">{progress.totalXp}</p>
-          </div>
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-            <p className="text-sm font-medium text-slate-500">
-              Tamamlanan proje
-            </p>
-            <p className="mt-2 text-3xl font-bold">
-              {progress.completedProjects}
-            </p>
-          </div>
+          <CareerAvatar careerLevelIndex={progress.careerLevelIndex} size="lg" />
         </div>
+      </section>
 
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+      <section className="grid gap-4 md:grid-cols-3">
+        <div className="rounded-lg border border-white/10 bg-slate-900/70 p-5 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10">
+          <p className="text-sm font-medium text-slate-400">Mevcut unvan</p>
+          <p className="mt-2 text-xl font-bold text-white">
+            {careerLevels[progress.careerLevelIndex]}
+          </p>
+        </div>
+        <div className="rounded-lg border border-white/10 bg-slate-900/70 p-5 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10">
+          <p className="text-sm font-medium text-slate-400">Toplam XP</p>
+          <p className="mt-2 text-3xl font-bold text-white">
+            {progress.totalXp}
+          </p>
+        </div>
+        <div className="rounded-lg border border-white/10 bg-slate-900/70 p-5 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10">
+          <p className="text-sm font-medium text-slate-400">
+            Tamamlanan proje
+          </p>
+          <p className="mt-2 text-3xl font-bold text-white">
+            {progress.completedProjects}
+          </p>
+        </div>
+      </section>
+
+      <section className="rounded-lg border border-white/10 bg-slate-900/70 p-5 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10">
+        <div className="flex flex-col gap-3 sm:flex-row">
           <Link
             href="/game"
-            className="inline-flex h-12 items-center justify-center rounded-md bg-cyan-700 px-6 font-semibold text-white transition-colors hover:bg-cyan-800"
+            className="inline-flex h-12 items-center justify-center rounded-md bg-cyan-500 px-6 font-semibold text-slate-950 transition-colors hover:bg-cyan-300"
           >
             Oyuna Devam Et
           </Link>
           <button
             type="button"
             onClick={handleResetProgress}
-            className="inline-flex h-12 items-center justify-center rounded-md border border-red-200 px-6 font-semibold text-red-700 transition-colors hover:bg-red-50"
+            className="inline-flex h-12 items-center justify-center rounded-md border border-red-300/30 bg-red-500/10 px-6 font-semibold text-red-200 transition-colors hover:bg-red-500/20"
           >
             İlerlemeyi Sıfırla
           </button>
           <Link
             href="/"
-            className="inline-flex h-12 items-center justify-center rounded-md border border-slate-300 px-6 font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+            className="inline-flex h-12 items-center justify-center rounded-md border border-white/10 bg-white/[0.03] px-6 font-semibold text-slate-100 transition-colors hover:border-cyan-300/40 hover:bg-cyan-300/10"
           >
             Ana Sayfa
           </Link>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

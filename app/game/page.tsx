@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { CareerAvatar } from "@/components/CareerAvatar";
 import { projects, type ProjectOption } from "@/data/projects";
 import {
   careerLevels,
@@ -124,136 +125,138 @@ export default function GamePage() {
 
   if (showResults && gameResult) {
     return (
-      <main className="min-h-screen bg-slate-100 px-6 py-10 text-slate-950">
-        <section className="mx-auto flex w-full max-w-3xl flex-col gap-6 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-          <div>
-            <Link href="/" className="text-sm font-medium text-cyan-700">
-              Ana sayfa
-            </Link>
-            <h1 className="mt-4 text-3xl font-bold">Sonuclar</h1>
-            <p className="mt-2 text-slate-600">{project.title}</p>
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
+        <section className="rounded-lg border border-white/10 bg-slate-900/70 p-6 shadow-2xl shadow-cyan-950/30 ring-1 ring-cyan-300/10">
+          <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-sm font-medium uppercase tracking-wide text-cyan-300">
+                {project.title}
+              </p>
+              <h1 className="mt-2 text-3xl font-bold text-white">Sonuçlar</h1>
+              <p className="mt-2 text-slate-300">
+                Yeni unvan: {gameResult.newTitle}
+              </p>
+            </div>
+            <CareerAvatar title={gameResult.newTitle} size="lg" />
           </div>
+        </section>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
-              <p className="text-sm font-medium text-slate-500">Yildiz</p>
-              <p className="mt-2 text-3xl font-bold text-cyan-700">
-                {"★".repeat(gameResult.stars)}
-              </p>
-            </div>
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
-              <p className="text-sm font-medium text-slate-500">
-                Kazanilan XP
-              </p>
-              <p className="mt-2 text-3xl font-bold">{gameResult.earnedXp}</p>
-            </div>
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
-              <p className="text-sm font-medium text-slate-500">
-                Kariyer sonucu
-              </p>
-              <p className="mt-2 text-2xl font-bold">
-                {gameResult.careerResult}
-              </p>
-            </div>
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
-              <p className="text-sm font-medium text-slate-500">Yeni unvan</p>
-              <p className="mt-2 text-2xl font-bold">{gameResult.newTitle}</p>
-            </div>
-          </div>
-
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-medium text-slate-500">Toplam skor</p>
-            <p className="mt-2 text-3xl font-bold">{totalScore}</p>
-            <p className="mt-4 leading-7 text-slate-700">
-              {gameResult.feedback}
+        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="rounded-lg border border-white/10 bg-slate-900/70 p-5 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10">
+            <p className="text-sm font-medium text-slate-400">Yıldız</p>
+            <p className="mt-2 text-3xl font-bold text-cyan-300">
+              {"★".repeat(gameResult.stars)}
             </p>
           </div>
+          <div className="rounded-lg border border-white/10 bg-slate-900/70 p-5 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10">
+            <p className="text-sm font-medium text-slate-400">Kazanılan XP</p>
+            <p className="mt-2 text-3xl font-bold text-white">
+              {gameResult.earnedXp}
+            </p>
+          </div>
+          <div className="rounded-lg border border-white/10 bg-slate-900/70 p-5 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10">
+            <p className="text-sm font-medium text-slate-400">
+              Kariyer sonucu
+            </p>
+            <p className="mt-2 text-2xl font-bold text-white">
+              {gameResult.careerResult}
+            </p>
+          </div>
+          <div className="rounded-lg border border-white/10 bg-slate-900/70 p-5 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10">
+            <p className="text-sm font-medium text-slate-400">Toplam skor</p>
+            <p className="mt-2 text-3xl font-bold text-white">{totalScore}</p>
+          </div>
+        </section>
 
-          <div className="flex flex-col gap-3 sm:flex-row">
+        <section className="rounded-lg border border-white/10 bg-slate-900/70 p-6 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10">
+          <p className="leading-7 text-slate-300">{gameResult.feedback}</p>
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             <Link
               href="/"
-              className="inline-flex h-12 items-center justify-center rounded-md border border-slate-300 px-6 font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+              className="inline-flex h-12 items-center justify-center rounded-md border border-white/10 bg-white/[0.03] px-6 font-semibold text-slate-100 transition-colors hover:border-cyan-300/40 hover:bg-cyan-300/10"
             >
-              Ana Sayfaya Don
+              Ana Sayfaya Dön
             </Link>
             <button
               type="button"
               onClick={restartGame}
-              className="inline-flex h-12 items-center justify-center rounded-md bg-cyan-700 px-6 font-semibold text-white transition-colors hover:bg-cyan-800"
+              className="inline-flex h-12 items-center justify-center rounded-md bg-cyan-500 px-6 font-semibold text-slate-950 transition-colors hover:bg-cyan-300"
             >
               Tekrar Oyna
             </button>
           </div>
         </section>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 px-6 py-10 text-slate-950">
-      <section className="mx-auto flex w-full max-w-3xl flex-col gap-6 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-        <div>
-          <Link href="/" className="text-sm font-medium text-cyan-700">
-            Ana sayfa
-          </Link>
-          <h1 className="mt-4 text-3xl font-bold">{project.title}</h1>
-          <p className="mt-2 text-slate-600">
-            {project.methodology} | Raund {round.roundNumber} /{" "}
-            {project.rounds.length}
-          </p>
-          <p className="mt-1 text-sm font-medium text-slate-500">
-            Toplam skor: {totalScore}
-          </p>
-        </div>
-
-        <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
-          <p className="text-sm font-medium text-cyan-700">{round.phase}</p>
-          <h2 className="mt-2 text-lg font-semibold">Senaryo</h2>
-          <p className="mt-3 leading-7 text-slate-700">{round.scenario}</p>
-        </div>
-
-        <div className="grid gap-3">
-          {round.options.map((option) => (
-            <button
-              key={option.text}
-              type="button"
-              disabled={Boolean(selectedOption)}
-              onClick={() => chooseOption(option)}
-              className="rounded-md border border-slate-300 bg-white px-4 py-3 text-left font-medium text-slate-800 transition-colors hover:bg-cyan-50 disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              {option.text}
-            </button>
-          ))}
-        </div>
-
-        {selectedOption ? (
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
-            <h2 className="text-lg font-semibold">Feedback</h2>
-            <p className="mt-2 text-slate-700">{selectedOption.feedback}</p>
-            <p className="mt-2 text-sm font-medium text-cyan-700">
-              Bu secimden gelen skor: {selectedOption.score}
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
+      <section className="rounded-lg border border-white/10 bg-slate-900/70 p-6 shadow-2xl shadow-cyan-950/30 ring-1 ring-cyan-300/10">
+        <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-sm font-medium uppercase tracking-wide text-cyan-300">
+              {project.methodology} · Raund {round.roundNumber} /{" "}
+              {project.rounds.length}
+            </p>
+            <h1 className="mt-2 text-3xl font-bold text-white">
+              {project.title}
+            </h1>
+            <p className="mt-2 text-sm font-medium text-slate-400">
+              Toplam skor: {totalScore}
             </p>
           </div>
-        ) : null}
-
-        {selectedOption ? (
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <button
-              type="button"
-              onClick={isLastRound ? showResultScreen : goToNextRound}
-              className="inline-flex h-12 items-center justify-center rounded-md bg-cyan-700 px-6 font-semibold text-white transition-colors hover:bg-cyan-800"
-            >
-              {isLastRound ? "Sonuclari Gor" : "Sonraki Raund"}
-            </button>
-            <Link
-              href="/profile"
-              className="inline-flex h-12 items-center justify-center rounded-md border border-slate-300 px-6 font-semibold text-slate-700 transition-colors hover:bg-slate-50"
-            >
-              Profil Sayfasi
-            </Link>
-          </div>
-        ) : null}
+          <CareerAvatar careerLevelIndex={careerLevel} size="lg" />
+        </div>
       </section>
-    </main>
+
+      <section className="rounded-lg border border-white/10 bg-slate-900/70 p-6 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10">
+        <p className="text-sm font-semibold text-cyan-300">{round.phase}</p>
+        <h2 className="mt-2 text-xl font-semibold text-white">Senaryo</h2>
+        <p className="mt-3 leading-7 text-slate-300">{round.scenario}</p>
+      </section>
+
+      <section className="grid gap-3">
+        {round.options.map((option) => (
+          <button
+            key={option.text}
+            type="button"
+            disabled={Boolean(selectedOption)}
+            onClick={() => chooseOption(option)}
+            className="rounded-lg border border-white/10 bg-slate-900/70 px-4 py-4 text-left font-medium text-slate-100 shadow-lg shadow-cyan-950/10 transition-colors hover:border-cyan-300/40 hover:bg-cyan-300/10 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {option.text}
+          </button>
+        ))}
+      </section>
+
+      {selectedOption ? (
+        <section className="rounded-lg border border-cyan-300/20 bg-cyan-300/10 p-5 shadow-xl shadow-cyan-950/20">
+          <h2 className="text-lg font-semibold text-white">Feedback</h2>
+          <p className="mt-2 text-slate-300">{selectedOption.feedback}</p>
+          <p className="mt-2 text-sm font-medium text-cyan-200">
+            Bu seçimden gelen skor: {selectedOption.score}
+          </p>
+        </section>
+      ) : null}
+
+      {selectedOption ? (
+        <section className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <button
+            type="button"
+            onClick={isLastRound ? showResultScreen : goToNextRound}
+            className="inline-flex h-12 items-center justify-center rounded-md bg-cyan-500 px-6 font-semibold text-slate-950 transition-colors hover:bg-cyan-300"
+          >
+            {isLastRound ? "Sonuçları Gör" : "Sonraki Raund"}
+          </button>
+          <Link
+            href="/profile"
+            className="inline-flex h-12 items-center justify-center rounded-md border border-white/10 bg-white/[0.03] px-6 font-semibold text-slate-100 transition-colors hover:border-cyan-300/40 hover:bg-cyan-300/10"
+          >
+            Profil Sayfası
+          </Link>
+        </section>
+      ) : null}
+    </div>
   );
 }

@@ -28,7 +28,7 @@ export default function LoginPage() {
     event.preventDefault();
 
     if (!form.email.trim() || !form.password.trim()) {
-      setError("Email ve password alanlarini doldur.");
+      setError("Email ve password alanlarını doldur.");
       return;
     }
 
@@ -41,64 +41,64 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-100 px-6 py-10 text-slate-950">
-      <section className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-        <Link href="/" className="text-sm font-medium text-cyan-700">
-          Ana sayfa
-        </Link>
-        <h1 className="mt-4 text-3xl font-bold">Giris Yap</h1>
-        <p className="mt-2 text-slate-600">
-          Simdilik fake login akisi. Gercek auth daha sonra baglanabilir.
+    <div className="mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-md items-center">
+      <section className="w-full rounded-lg border border-white/10 bg-slate-900/70 p-6 shadow-2xl shadow-cyan-950/30 ring-1 ring-cyan-300/10">
+        <p className="text-sm font-medium uppercase tracking-wide text-cyan-300">
+          Welcome back
+        </p>
+        <h1 className="mt-3 text-3xl font-bold text-white">Giriş Yap</h1>
+        <p className="mt-2 text-slate-300">
+          Şimdilik fake login akışı. Gerçek auth daha sonra bağlanabilir.
         </p>
 
         <form onSubmit={handleFakeLogin} className="mt-6 grid gap-4">
-          <label className="grid gap-2 text-sm font-medium text-slate-700">
+          <label className="grid gap-2 text-sm font-medium text-slate-300">
             Email
             <input
               type="email"
               value={form.email}
               onChange={(event) => updateField("email", event.target.value)}
-              className="h-11 rounded-md border border-slate-300 px-3 text-base outline-none transition-colors focus:border-cyan-700"
+              className="h-11 rounded-md border border-white/10 bg-slate-950/70 px-3 text-base text-slate-100 outline-none transition-colors placeholder:text-slate-500 focus:border-cyan-300/60"
               placeholder="you@example.com"
             />
           </label>
 
-          <label className="grid gap-2 text-sm font-medium text-slate-700">
+          <label className="grid gap-2 text-sm font-medium text-slate-300">
             Password
             <input
               type="password"
               value={form.password}
               onChange={(event) => updateField("password", event.target.value)}
-              className="h-11 rounded-md border border-slate-300 px-3 text-base outline-none transition-colors focus:border-cyan-700"
+              className="h-11 rounded-md border border-white/10 bg-slate-950/70 px-3 text-base text-slate-100 outline-none transition-colors placeholder:text-slate-500 focus:border-cyan-300/60"
               placeholder="••••••••"
             />
           </label>
 
-          {error ? <p className="text-sm font-medium text-red-700">{error}</p> : null}
+          {error ? <p className="text-sm font-medium text-red-300">{error}</p> : null}
 
           <button
             type="submit"
-            className="inline-flex h-12 items-center justify-center rounded-md bg-cyan-700 px-6 font-semibold text-white transition-colors hover:bg-cyan-800"
+            className="inline-flex h-12 items-center justify-center rounded-md bg-cyan-500 px-6 font-semibold text-slate-950 transition-colors hover:bg-cyan-300"
           >
-            Giris Yap
+            Giriş Yap
           </button>
         </form>
 
         <button
           type="button"
           onClick={continueAsDemo}
-          className="mt-3 inline-flex h-12 w-full items-center justify-center rounded-md border border-slate-300 px-6 font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+          className="mt-3 inline-flex h-12 w-full items-center justify-center rounded-md border border-white/10 bg-white/[0.03] px-6 font-semibold text-slate-100 transition-colors hover:border-cyan-300/40 hover:bg-cyan-300/10"
         >
           Demo olarak devam et
         </button>
 
-        <p className="mt-6 text-sm text-slate-600">
-          Hesabin yok mu?{" "}
-          <Link href="/register" className="font-semibold text-cyan-700">
-            Kayit ol
+        <p className="mt-6 text-sm text-slate-300">
+          Hesabın yok mu?{" "}
+          <Link href="/register" className="font-semibold text-cyan-300">
+            Kayıt ol
           </Link>
         </p>
       </section>
-    </main>
+    </div>
   );
 }
