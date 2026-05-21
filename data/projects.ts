@@ -4,6 +4,7 @@ export type ProjectOption = {
   text: string;
   score: number;
   feedback: string;
+  learningNote: string;
   isBest: boolean;
   metricEffects: {
     projectHealth: number;
@@ -46,6 +47,8 @@ export const projects: Project[] = [
             score: 30,
             feedback:
               "Doğru yaklaşım. İlk sürüm için odak korunur ve teslim riski azalır.",
+            learningNote:
+              "In Agile projects, defining the MVP keeps learning fast and prevents uncontrolled scope creep.",
             isBest: true,
             metricEffects: {
               projectHealth: 18,
@@ -59,6 +62,8 @@ export const projects: Project[] = [
             score: 5,
             feedback:
               "Bu karar ekibi zorlar. Kapsam büyürken tarih sabit kalırsa kalite riski artar.",
+            learningNote:
+              "In Agile projects, adding every request to the same release usually lowers focus and weakens iteration quality.",
             isBest: false,
             metricEffects: {
               projectHealth: -16,
@@ -72,6 +77,8 @@ export const projects: Project[] = [
             score: 10,
             feedback:
               "Ekip görüşü önemli ama paydaş beklentisini birlikte yönetmek gerekir.",
+            learningNote:
+              "Agile teams balance technical judgment with stakeholder collaboration so priorities stay transparent.",
             isBest: false,
             metricEffects: {
               projectHealth: -8,
@@ -85,6 +92,8 @@ export const projects: Project[] = [
             score: 25,
             feedback:
               "İyi karar. Kapsamı bölmek hem beklentiyi hem teslimatı daha yönetilebilir yapar.",
+            learningNote:
+              "Backlog prioritization helps Agile teams deliver value now while preserving future options.",
             isBest: false,
             metricEffects: {
               projectHealth: 14,
@@ -105,6 +114,8 @@ export const projects: Project[] = [
             score: 10,
             feedback:
               "Kısa vadede işe yarayabilir ama sürdürülebilirlik ve moral zarar görebilir.",
+            learningNote:
+              "Sustainable pace is central to Agile delivery because burnout reduces future velocity.",
             isBest: false,
             metricEffects: {
               projectHealth: -6,
@@ -118,6 +129,8 @@ export const projects: Project[] = [
             score: 20,
             feedback:
               "İyi hamle. Ekip engelleri erken paylaşırsa çözüm şansı artar.",
+            learningNote:
+              "Daily inspection helps Agile teams surface blockers before they become delivery risks.",
             isBest: false,
             metricEffects: {
               projectHealth: 8,
@@ -131,6 +144,8 @@ export const projects: Project[] = [
             score: 30,
             feedback:
               "En sağlıklı seçim. Kapasiteye göre kapsam ayarlamak ekibi ve teslimatı korur.",
+            learningNote:
+              "In Agile projects, protecting sprint scope helps maintain team velocity and prevents uncontrolled scope creep.",
             isBest: true,
             metricEffects: {
               projectHealth: 16,
@@ -144,6 +159,8 @@ export const projects: Project[] = [
             score: 0,
             feedback:
               "Geç bilgi vermek riski büyütür. Sorunu erken görünür yapmak daha doğru olur.",
+            learningNote:
+              "Agile relies on transparency; hiding delivery risk removes the chance to adapt early.",
             isBest: false,
             metricEffects: {
               projectHealth: -18,
@@ -164,6 +181,8 @@ export const projects: Project[] = [
             score: 0,
             feedback:
               "Kritik hata demoda güven kaybına yol açabilir. Risk saklanmamalı.",
+            learningNote:
+              "A demo should build trust; knowingly showing unstable work can damage stakeholder confidence.",
             isBest: false,
             metricEffects: {
               projectHealth: -24,
@@ -177,6 +196,8 @@ export const projects: Project[] = [
             score: 10,
             feedback:
               "Kaliteyi korumak iyi ama iletişim eksik kalırsa paydaş güveni azalır.",
+            learningNote:
+              "Agile stakeholder communication should explain tradeoffs instead of simply removing visibility.",
             isBest: false,
             metricEffects: {
               projectHealth: 6,
@@ -190,6 +211,8 @@ export const projects: Project[] = [
             score: 25,
             feedback:
               "İyi seçim. Şeffaflık ve kontrollü demo akışı beklentiyi dengeler.",
+            learningNote:
+              "Transparent demo scoping keeps feedback loops alive while protecting product credibility.",
             isBest: false,
             metricEffects: {
               projectHealth: 14,
@@ -203,6 +226,8 @@ export const projects: Project[] = [
             score: 30,
             feedback:
               "Doğru karar. Demo değerini korurken kritik kalite riskini azaltırsın.",
+            learningNote:
+              "Agile teams can adapt demo scope to preserve value while managing urgent quality risks.",
             isBest: true,
             metricEffects: {
               projectHealth: 20,
@@ -232,6 +257,8 @@ export const projects: Project[] = [
             score: 5,
             feedback:
               "Bu karar sprint hedefini şişirir ve teslim odağını zayıflatır.",
+            learningNote:
+              "Mid-sprint scope growth often weakens Agile predictability and increases delivery stress.",
             isBest: false,
             metricEffects: {
               projectHealth: -14,
@@ -245,6 +272,8 @@ export const projects: Project[] = [
             score: 30,
             feedback:
               "Sprint odağı korundu. Değişiklik isteği görünür ve yönetilebilir hale geldi.",
+            learningNote:
+              "Backlog management lets Agile teams welcome change without disrupting the current sprint goal.",
             isBest: true,
             metricEffects: {
               projectHealth: 16,
@@ -258,6 +287,8 @@ export const projects: Project[] = [
             score: 25,
             feedback:
               "İyi karar. Tahmin ve takas sprint planını gerçekçi tutar.",
+            learningNote:
+              "Agile estimation supports scope tradeoffs when stakeholder needs shift during an iteration.",
             isBest: false,
             metricEffects: {
               projectHealth: 12,
@@ -271,6 +302,8 @@ export const projects: Project[] = [
             score: 10,
             feedback:
               "Sınır koydun ama paydaş iletişimi olmadan karar güven kaybettirebilir.",
+            learningNote:
+              "Agile product decisions should involve the product owner so priority choices remain shared.",
             isBest: false,
             metricEffects: {
               projectHealth: 2,
@@ -291,6 +324,8 @@ export const projects: Project[] = [
             score: 25,
             feedback:
               "İyi seçim. Engelleri erken kaldırmak iteration akışını güçlendirir.",
+            learningNote:
+              "Removing blockers during the sprint helps protect flow and supports healthier velocity.",
             isBest: false,
             metricEffects: {
               projectHealth: 12,
@@ -304,6 +339,8 @@ export const projects: Project[] = [
             score: 5,
             feedback:
               "Bu yaklaşım morali düşürür ve problemi çözmek yerine savunma yaratır.",
+            learningNote:
+              "Velocity is a planning signal, not a blame tool; misuse can damage team trust.",
             isBest: false,
             metricEffects: {
               projectHealth: -10,
@@ -317,6 +354,8 @@ export const projects: Project[] = [
             score: 30,
             feedback:
               "Doğru hamle. Gerçek kapasiteyle hedefi hizalamak sprint sağlığını korur.",
+            learningNote:
+              "Velocity management helps Agile teams adjust commitments based on evidence, not optimism.",
             isBest: true,
             metricEffects: {
               projectHealth: 18,
@@ -330,6 +369,8 @@ export const projects: Project[] = [
             score: 0,
             feedback:
               "Gecikmeyi saklamak paydaş iletişimini ve sprint güvenini zedeler.",
+            learningNote:
+              "Agile progress should be inspectable so the team can adapt before the sprint review.",
             isBest: false,
             metricEffects: {
               projectHealth: -18,
@@ -350,6 +391,8 @@ export const projects: Project[] = [
             score: 10,
             feedback:
               "Demo sadeleşti ama iletişim eksikliği paydaş güvenini azaltır.",
+            learningNote:
+              "A sprint review should clarify what was learned, including why some work moved back to the backlog.",
             isBest: false,
             metricEffects: {
               projectHealth: 2,
@@ -363,6 +406,8 @@ export const projects: Project[] = [
             score: 0,
             feedback:
               "Kalite riski büyür. Demo öncesi testleri atlamak güvenilirliği düşürür.",
+            learningNote:
+              "Agile speed should not remove quality checks; unfinished work belongs in the backlog.",
             isBest: false,
             metricEffects: {
               projectHealth: -22,
@@ -376,6 +421,8 @@ export const projects: Project[] = [
             score: 20,
             feedback:
               "İyi iletişim. Beklentiyi yönetir ama demo değerini de net göstermek gerekir.",
+            learningNote:
+              "Stakeholder communication is strongest when it pairs scope updates with visible working value.",
             isBest: false,
             metricEffects: {
               projectHealth: 8,
@@ -389,6 +436,8 @@ export const projects: Project[] = [
             score: 30,
             feedback:
               "Demo değeri korundu. Eksikler şeffaf biçimde backlog'a taşındı.",
+            learningNote:
+              "Agile demos should show completed value while openly moving unfinished work back into backlog planning.",
             isBest: true,
             metricEffects: {
               projectHealth: 16,
@@ -419,6 +468,8 @@ export const projects: Project[] = [
             score: 30,
             feedback:
               "Doğru karar. Waterfall akışında erken gereksinim doğrulama teslimatı güçlendirir.",
+            learningNote:
+              "In Waterfall projects, clarifying requirements early reduces late-stage rework and acceptance conflicts.",
             isBest: true,
             metricEffects: {
               projectHealth: 18,
@@ -432,6 +483,8 @@ export const projects: Project[] = [
             score: 5,
             feedback:
               "Eksik doğrulama sonraki fazlarda maliyetli değişikliklere yol açabilir.",
+            learningNote:
+              "Waterfall planning depends on validated requirements before design and delivery phases begin.",
             isBest: false,
             metricEffects: {
               projectHealth: -16,
@@ -445,6 +498,8 @@ export const projects: Project[] = [
             score: 25,
             feedback:
               "İyi seçim. Varsayımları belgelemek değişiklik yönetimini kolaylaştırır.",
+            learningNote:
+              "Documented assumptions make Waterfall scope decisions auditable when requirements mature.",
             isBest: false,
             metricEffects: {
               projectHealth: 14,
@@ -458,6 +513,8 @@ export const projects: Project[] = [
             score: 10,
             feedback:
               "Teknik analiz gerekli ama müşteri onayı olmadan kapsam yoruma açık kalır.",
+            learningNote:
+              "Waterfall requirements should be validated with the customer, not inferred only by implementation teams.",
             isBest: false,
             metricEffects: {
               projectHealth: -8,
@@ -479,6 +536,8 @@ export const projects: Project[] = [
             score: 0,
             feedback:
               "Bu yaklaşım fazlar arası uyumsuzluğu ve yeniden iş yapmayı artırır.",
+            learningNote:
+              "Waterfall delivery needs controlled documentation because separate sources create integration risk.",
             isBest: false,
             metricEffects: {
               projectHealth: -20,
@@ -492,6 +551,8 @@ export const projects: Project[] = [
             score: 30,
             feedback:
               "Doğru karar. Ortak dokümantasyon entegrasyon riskini azaltır.",
+            learningNote:
+              "Phase approval and a single source of truth keep Waterfall teams aligned before implementation continues.",
             isBest: true,
             metricEffects: {
               projectHealth: 18,
@@ -505,6 +566,8 @@ export const projects: Project[] = [
             score: 20,
             feedback:
               "İyi hamle. Değişiklik izlenir ama tek kaynak yaklaşımı kadar güçlü değildir.",
+            learningNote:
+              "Change logs support traceability, but Waterfall teams still benefit from one approved baseline.",
             isBest: false,
             metricEffects: {
               projectHealth: 8,
@@ -518,6 +581,8 @@ export const projects: Project[] = [
             score: 15,
             feedback:
               "Riskli alanları azaltır ama tüm teslimat için dokümantasyon boşlukları kalabilir.",
+            learningNote:
+              "Partial documentation can reduce immediate risk but may leave acceptance gaps in Waterfall projects.",
             isBest: false,
             metricEffects: {
               projectHealth: 4,
@@ -539,6 +604,8 @@ export const projects: Project[] = [
             score: 5,
             feedback:
               "Kısa vadede olumlu görünür ama kontrolsüz kapsam artışı teslimatı zayıflatır.",
+            learningNote:
+              "Waterfall change management protects delivery focus when new scope appears during acceptance.",
             isBest: false,
             metricEffects: {
               projectHealth: -16,
@@ -552,6 +619,8 @@ export const projects: Project[] = [
             score: 10,
             feedback:
               "Kapsamı korudun ama çözüm odaklı değişiklik yönetimi eksik kaldı.",
+            learningNote:
+              "Acceptance conflicts need documented evidence plus a constructive path for change requests.",
             isBest: false,
             metricEffects: {
               projectHealth: 4,
@@ -565,6 +634,8 @@ export const projects: Project[] = [
             score: 25,
             feedback:
               "İyi seçim. Kabul kriterlerini ortak okumak güveni ve netliği artırır.",
+            learningNote:
+              "Acceptance criteria help Waterfall teams separate agreed scope from new change requests.",
             isBest: false,
             metricEffects: {
               projectHealth: 12,
@@ -578,6 +649,8 @@ export const projects: Project[] = [
             score: 30,
             feedback:
               "Doğru Waterfall yaklaşımı. Kapsam, onay ve değişiklik yönetimi netleşti.",
+            learningNote:
+              "A requirements matrix gives Waterfall teams traceability for acceptance decisions and formal changes.",
             isBest: true,
             metricEffects: {
               projectHealth: 18,

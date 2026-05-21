@@ -90,6 +90,33 @@ export default function Home() {
       </section>
 
       <MetricsPanel metrics={initialMetrics} />
+
+      <section className="rounded-lg border border-white/10 bg-slate-900/70 p-6 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10">
+        <p className="text-sm font-medium uppercase tracking-wide text-cyan-300">
+          Learning Mode
+        </p>
+        <h2 className="mt-2 text-2xl font-bold text-white">
+          Learn by Managing
+        </h2>
+        <p className="mt-3 max-w-3xl leading-7 text-slate-300">
+          Make project decisions, see their consequences, and improve your
+          project management judgment across Agile and Waterfall scenarios.
+        </p>
+        <div className="mt-5 grid gap-3 md:grid-cols-3">
+          {[
+            "Practice methodology selection",
+            "Improve stakeholder decisions",
+            "Build career progress through XP and badges",
+          ].map((item) => (
+            <div
+              key={item}
+              className="rounded-md border border-cyan-300/20 bg-cyan-300/10 p-4 text-sm font-semibold text-cyan-100"
+            >
+              {item}
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

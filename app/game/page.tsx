@@ -46,6 +46,29 @@ function MethodologyBadge({ methodology }: { methodology: ProjectMethodology }) 
   );
 }
 
+const methodologyCards = [
+  {
+    methodology: "Agile" as const,
+    concepts: ["Sprint", "Backlog", "MVP", "Velocity", "Continuous Feedback"],
+    description:
+      "Agile, belirsizliğin yüksek olduğu projelerde küçük iterasyonlarla ilerlemeyi, geri bildirim almayı ve öncelikleri düzenli güncellemeyi sağlar.",
+    className: "border-cyan-300/20 bg-cyan-300/10 text-cyan-100",
+  },
+  {
+    methodology: "Waterfall" as const,
+    concepts: [
+      "Requirements",
+      "Documentation",
+      "Phase-Gate",
+      "Acceptance Criteria",
+      "Change Request",
+    ],
+    description:
+      "Waterfall, gereksinimleri baştan daha net olan projelerde planlı, sıralı ve dokümantasyon odaklı ilerlemeyi sağlar.",
+    className: "border-amber-300/20 bg-amber-300/10 text-amber-100",
+  },
+];
+
 function getResultForScore(
   score: number,
   currentCareerLevel: number,
@@ -244,6 +267,33 @@ export default function GamePage() {
           </p>
         </section>
 
+        <section className="grid gap-4 lg:grid-cols-2">
+          {methodologyCards.map((card) => (
+            <article
+              key={card.methodology}
+              className={`rounded-lg border p-5 shadow-xl shadow-cyan-950/20 ${card.className}`}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="text-xl font-bold">{card.methodology}</h2>
+                <MethodologyBadge methodology={card.methodology} />
+              </div>
+              <p className="mt-3 leading-7 text-slate-200">
+                {card.description}
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {card.concepts.map((concept) => (
+                  <span
+                    key={concept}
+                    className="rounded-md border border-white/10 bg-slate-950/40 px-3 py-2 text-xs font-semibold text-slate-100"
+                  >
+                    {concept}
+                  </span>
+                ))}
+              </div>
+            </article>
+          ))}
+        </section>
+
         <section className="grid gap-4 lg:grid-cols-3">
           {projects.map((project) => {
             const isSelected = project.id === selectedProjectId;
@@ -433,6 +483,14 @@ export default function GamePage() {
         <section className="rounded-lg border border-cyan-300/20 bg-cyan-300/10 p-5 shadow-xl shadow-cyan-950/20">
           <h2 className="text-lg font-semibold text-white">Feedback</h2>
           <p className="mt-2 text-slate-300">{selectedOption.feedback}</p>
+          <div className="mt-4 rounded-md border border-white/10 bg-slate-950/40 p-4">
+            <p className="text-sm font-semibold uppercase tracking-wide text-cyan-200">
+              Why this matters
+            </p>
+            <p className="mt-2 text-sm leading-6 text-slate-300">
+              {selectedOption.learningNote}
+            </p>
+          </div>
           <p className="mt-2 text-sm font-medium text-cyan-200">
             Bu seçimden gelen skor: {selectedOption.score}
           </p>

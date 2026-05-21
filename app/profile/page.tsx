@@ -11,6 +11,26 @@ import {
   type ProgressData,
 } from "@/progressStorage";
 
+function getManagementStyle(earnedBadges?: string[]) {
+  if (earnedBadges?.includes("Agile Mindset")) {
+    return "Agile Facilitator";
+  }
+
+  if (earnedBadges?.includes("Waterfall Discipline")) {
+    return "Structured Planner";
+  }
+
+  if (earnedBadges?.includes("Deadline Saver")) {
+    return "Delivery-Focused Manager";
+  }
+
+  if (earnedBadges?.includes("Team Builder")) {
+    return "Team-Oriented Leader";
+  }
+
+  return "Emerging Project Manager";
+}
+
 export default function ProfilePage() {
   const [progress, setProgress] = useState<ProgressData>(defaultProgress);
 
@@ -27,6 +47,10 @@ export default function ProfilePage() {
   function handleResetProgress() {
     setProgress(resetProgress());
   }
+
+  const currentTitle =
+    careerLevels[progress.careerLevelIndex] ?? careerLevels[0];
+  const managementStyle = getManagementStyle(progress.earnedBadges);
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
@@ -45,26 +69,72 @@ export default function ProfilePage() {
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-3">
+      <section className="grid gap-4 md:grid-cols-4">
         <div className="rounded-lg border border-white/10 bg-slate-900/70 p-5 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10">
-          <p className="text-sm font-medium text-slate-400">Mevcut unvan</p>
-          <p className="mt-2 text-xl font-bold text-white">
-            {careerLevels[progress.careerLevelIndex]}
-          </p>
-        </div>
-        <div className="rounded-lg border border-white/10 bg-slate-900/70 p-5 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10">
-          <p className="text-sm font-medium text-slate-400">Toplam XP</p>
+          <p className="text-sm font-medium text-slate-400">Total XP</p>
           <p className="mt-2 text-3xl font-bold text-white">
             {progress.totalXp}
           </p>
         </div>
         <div className="rounded-lg border border-white/10 bg-slate-900/70 p-5 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10">
           <p className="text-sm font-medium text-slate-400">
-            Tamamlanan proje
+            Completed Projects
           </p>
           <p className="mt-2 text-3xl font-bold text-white">
             {progress.completedProjects}
           </p>
+        </div>
+        <div className="rounded-lg border border-white/10 bg-slate-900/70 p-5 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10">
+          <p className="text-sm font-medium text-slate-400">Earned Badges</p>
+          <p className="mt-2 text-3xl font-bold text-white">
+            {progress.earnedBadges.length}
+          </p>
+        </div>
+        <div className="rounded-lg border border-white/10 bg-slate-900/70 p-5 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10">
+          <p className="text-sm font-medium text-slate-400">Current Title</p>
+          <p className="mt-2 text-xl font-bold text-white">
+            {currentTitle}
+          </p>
+        </div>
+      </section>
+
+      <section className="rounded-lg border border-white/10 bg-slate-900/70 p-5 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10">
+        <p className="text-sm font-medium text-slate-400">Management Style</p>
+        <p className="mt-2 text-2xl font-bold text-cyan-200">
+          {managementStyle}
+        </p>
+      </section>
+
+      <section className="rounded-lg border border-white/10 bg-slate-900/70 p-5 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10">
+        <p className="text-sm font-medium text-slate-400">Career Timeline</p>
+        <div className="mt-5 grid gap-4 md:grid-cols-4">
+          {careerLevels.map((level, index) => {
+            const isComplete = index < progress.careerLevelIndex;
+            const isCurrent = index === progress.careerLevelIndex;
+
+            return (
+              <div
+                key={level}
+                className={`relative rounded-lg border p-4 ${
+                  isCurrent
+                    ? "border-cyan-300/50 bg-cyan-300/10 shadow-lg shadow-cyan-950/40"
+                    : isComplete
+                      ? "border-emerald-300/30 bg-emerald-300/10"
+                      : "border-white/10 bg-slate-950/40 opacity-60"
+                }`}
+              >
+                <div
+                  className={`mb-3 h-2 rounded-full ${
+                    isComplete || isCurrent ? "bg-cyan-400" : "bg-slate-700"
+                  }`}
+                />
+                <p className="text-sm font-bold text-white">{level}</p>
+                <p className="mt-2 text-xs text-slate-400">
+                  {isCurrent ? "Current level" : isComplete ? "Completed" : "Locked"}
+                </p>
+              </div>
+            );
+          })}
         </div>
       </section>
 
