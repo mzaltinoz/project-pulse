@@ -101,19 +101,6 @@ export const projects: Project[] = [
         scenario: "Ekip sprintte fazla iş aldı ve yetişemiyor.",
         options: [
           {
-            text: "Sprint kapsamında takas yapıp en düşük öncelikli işi çıkar.",
-            score: 30,
-            feedback:
-              "En sağlıklı seçim. Kapasiteye göre kapsam ayarlamak ekibi ve teslimatı korur.",
-            isBest: true,
-            metricEffects: {
-              projectHealth: 16,
-              teamMorale: 18,
-              stakeholderSatisfaction: 8,
-              deliveryFocus: 18,
-            },
-          },
-          {
             text: "Herkesten hafta sonu çalışmasını iste.",
             score: 10,
             feedback:
@@ -124,19 +111,6 @@ export const projects: Project[] = [
               teamMorale: -20,
               stakeholderSatisfaction: 4,
               deliveryFocus: 8,
-            },
-          },
-          {
-            text: "Durumu gizleyip sprint sonunda açıkla.",
-            score: 0,
-            feedback:
-              "Geç bilgi vermek riski büyütür. Sorunu erken görünür yapmak daha doğru olur.",
-            isBest: false,
-            metricEffects: {
-              projectHealth: -18,
-              teamMorale: -12,
-              stakeholderSatisfaction: -16,
-              deliveryFocus: -10,
             },
           },
           {
@@ -152,6 +126,32 @@ export const projects: Project[] = [
               deliveryFocus: 8,
             },
           },
+          {
+            text: "Sprint kapsamında takas yapıp en düşük öncelikli işi çıkar.",
+            score: 30,
+            feedback:
+              "En sağlıklı seçim. Kapasiteye göre kapsam ayarlamak ekibi ve teslimatı korur.",
+            isBest: true,
+            metricEffects: {
+              projectHealth: 16,
+              teamMorale: 18,
+              stakeholderSatisfaction: 8,
+              deliveryFocus: 18,
+            },
+          },
+          {
+            text: "Durumu gizleyip sprint sonunda açıkla.",
+            score: 0,
+            feedback:
+              "Geç bilgi vermek riski büyütür. Sorunu erken görünür yapmak daha doğru olur.",
+            isBest: false,
+            metricEffects: {
+              projectHealth: -18,
+              teamMorale: -12,
+              stakeholderSatisfaction: -16,
+              deliveryFocus: -10,
+            },
+          },
         ],
       },
       {
@@ -159,19 +159,6 @@ export const projects: Project[] = [
         phase: "Kriz",
         scenario: "Demo öncesi kritik bug çıktı.",
         options: [
-          {
-            text: "Bugu önceliklendir, demo kapsamından riskli bölümü çıkar.",
-            score: 30,
-            feedback:
-              "Doğru karar. Demo değerini korurken kritik kalite riskini azaltırsın.",
-            isBest: true,
-            metricEffects: {
-              projectHealth: 20,
-              teamMorale: 8,
-              stakeholderSatisfaction: 10,
-              deliveryFocus: 12,
-            },
-          },
           {
             text: "Bugu görmezden gel ve demoya aynen devam et.",
             score: 0,
@@ -211,6 +198,19 @@ export const projects: Project[] = [
               deliveryFocus: 8,
             },
           },
+          {
+            text: "Bugu önceliklendir, demo kapsamından riskli bölümü çıkar.",
+            score: 30,
+            feedback:
+              "Doğru karar. Demo değerini korurken kritik kalite riskini azaltırsın.",
+            isBest: true,
+            metricEffects: {
+              projectHealth: 20,
+              teamMorale: 8,
+              stakeholderSatisfaction: 10,
+              deliveryFocus: 12,
+            },
+          },
         ],
       },
     ],
@@ -228,19 +228,6 @@ export const projects: Project[] = [
         scenario: "Product owner sprint ortasında yeni özellik eklemek istiyor.",
         options: [
           {
-            text: "Yeni isteği backlog'a alıp sonraki sprint için önceliklendir.",
-            score: 30,
-            feedback:
-              "Sprint odağı korundu. Değişiklik isteği görünür ve yönetilebilir hale geldi.",
-            isBest: true,
-            metricEffects: {
-              projectHealth: 16,
-              teamMorale: 12,
-              stakeholderSatisfaction: 8,
-              deliveryFocus: 18,
-            },
-          },
-          {
             text: "Özelliği sprint kapsamına ekleyip aynı hedefi koru.",
             score: 5,
             feedback:
@@ -251,6 +238,19 @@ export const projects: Project[] = [
               teamMorale: -16,
               stakeholderSatisfaction: 6,
               deliveryFocus: -14,
+            },
+          },
+          {
+            text: "Yeni isteği backlog'a alıp sonraki sprint için önceliklendir.",
+            score: 30,
+            feedback:
+              "Sprint odağı korundu. Değişiklik isteği görünür ve yönetilebilir hale geldi.",
+            isBest: true,
+            metricEffects: {
+              projectHealth: 16,
+              teamMorale: 12,
+              stakeholderSatisfaction: 8,
+              deliveryFocus: 18,
             },
           },
           {
@@ -287,19 +287,6 @@ export const projects: Project[] = [
         scenario: "Ekip velocity düşmeye başladı ve sprint hedefi risk altında.",
         options: [
           {
-            text: "Velocity trendini görünür yapıp sprint hedefini yeniden netleştir.",
-            score: 30,
-            feedback:
-              "Doğru hamle. Gerçek kapasiteyle hedefi hizalamak sprint sağlığını korur.",
-            isBest: true,
-            metricEffects: {
-              projectHealth: 18,
-              teamMorale: 14,
-              stakeholderSatisfaction: 6,
-              deliveryFocus: 16,
-            },
-          },
-          {
             text: "Retrospective beklemeden engeller için hızlı aksiyon al.",
             score: 25,
             feedback:
@@ -326,6 +313,19 @@ export const projects: Project[] = [
             },
           },
           {
+            text: "Velocity trendini görünür yapıp sprint hedefini yeniden netleştir.",
+            score: 30,
+            feedback:
+              "Doğru hamle. Gerçek kapasiteyle hedefi hizalamak sprint sağlığını korur.",
+            isBest: true,
+            metricEffects: {
+              projectHealth: 18,
+              teamMorale: 14,
+              stakeholderSatisfaction: 6,
+              deliveryFocus: 16,
+            },
+          },
+          {
             text: "Eksik kalan işleri gizleyip sprint sonunda konuş.",
             score: 0,
             feedback:
@@ -345,19 +345,6 @@ export const projects: Project[] = [
         phase: "Demo Hazırlığı",
         scenario: "Demo öncesi bazı feature'lar tamamlanamadı.",
         options: [
-          {
-            text: "Tamamlanan akışı demo et, eksikleri backlog ve risk olarak paylaş.",
-            score: 30,
-            feedback:
-              "Demo değeri korundu. Eksikler şeffaf biçimde backlog'a taşındı.",
-            isBest: true,
-            metricEffects: {
-              projectHealth: 16,
-              teamMorale: 10,
-              stakeholderSatisfaction: 14,
-              deliveryFocus: 12,
-            },
-          },
           {
             text: "Tamamlanmayan feature'ları demo dışında bırakıp sebebini açıklama.",
             score: 10,
@@ -395,6 +382,19 @@ export const projects: Project[] = [
               teamMorale: 4,
               stakeholderSatisfaction: 12,
               deliveryFocus: 8,
+            },
+          },
+          {
+            text: "Tamamlanan akışı demo et, eksikleri backlog ve risk olarak paylaş.",
+            score: 30,
+            feedback:
+              "Demo değeri korundu. Eksikler şeffaf biçimde backlog'a taşındı.",
+            isBest: true,
+            metricEffects: {
+              projectHealth: 16,
+              teamMorale: 10,
+              stakeholderSatisfaction: 14,
+              deliveryFocus: 12,
             },
           },
         ],
@@ -475,19 +475,6 @@ export const projects: Project[] = [
           "Donanım ve yazılım ekipleri farklı teknik dokümanlar kullanıyor.",
         options: [
           {
-            text: "Tek kaynak doküman oluşturup faz onayıyla ekipleri hizala.",
-            score: 30,
-            feedback:
-              "Doğru karar. Ortak dokümantasyon entegrasyon riskini azaltır.",
-            isBest: true,
-            metricEffects: {
-              projectHealth: 18,
-              teamMorale: 8,
-              stakeholderSatisfaction: 10,
-              deliveryFocus: 16,
-            },
-          },
-          {
             text: "Her ekibin kendi dokümanıyla devam etmesine izin ver.",
             score: 0,
             feedback:
@@ -498,6 +485,19 @@ export const projects: Project[] = [
               teamMorale: -10,
               stakeholderSatisfaction: -8,
               deliveryFocus: -14,
+            },
+          },
+          {
+            text: "Tek kaynak doküman oluşturup faz onayıyla ekipleri hizala.",
+            score: 30,
+            feedback:
+              "Doğru karar. Ortak dokümantasyon entegrasyon riskini azaltır.",
+            isBest: true,
+            metricEffects: {
+              projectHealth: 18,
+              teamMorale: 8,
+              stakeholderSatisfaction: 10,
+              deliveryFocus: 16,
             },
           },
           {
@@ -535,19 +535,6 @@ export const projects: Project[] = [
           "Kabul testlerinde müşteri bazı gereksinimlerin eksik olduğunu söylüyor.",
         options: [
           {
-            text: "Eksikleri onaylı gereksinim matrisiyle karşılaştırıp change request aç.",
-            score: 30,
-            feedback:
-              "Doğru Waterfall yaklaşımı. Kapsam, onay ve değişiklik yönetimi netleşti.",
-            isBest: true,
-            metricEffects: {
-              projectHealth: 18,
-              teamMorale: 8,
-              stakeholderSatisfaction: 12,
-              deliveryFocus: 14,
-            },
-          },
-          {
             text: "Müşteri memnun olsun diye eksikleri ücretsiz ekle.",
             score: 5,
             feedback:
@@ -584,6 +571,19 @@ export const projects: Project[] = [
               teamMorale: 6,
               stakeholderSatisfaction: 14,
               deliveryFocus: 10,
+            },
+          },
+          {
+            text: "Eksikleri onaylı gereksinim matrisiyle karşılaştırıp change request aç.",
+            score: 30,
+            feedback:
+              "Doğru Waterfall yaklaşımı. Kapsam, onay ve değişiklik yönetimi netleşti.",
+            isBest: true,
+            metricEffects: {
+              projectHealth: 18,
+              teamMorale: 8,
+              stakeholderSatisfaction: 12,
+              deliveryFocus: 14,
             },
           },
         ],
