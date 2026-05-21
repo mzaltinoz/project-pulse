@@ -21,13 +21,23 @@ export type ProjectRound = {
   options: ProjectOption[];
 };
 
+export type ProjectBriefing = {
+  scenario: string;
+  stakes: string;
+  rules: string;
+};
+
 export type Project = {
   id: string;
   title: string;
   description: string;
   methodology: ProjectMethodology;
+  briefing: ProjectBriefing;
   rounds: ProjectRound[];
 };
+
+const defaultBriefingRules =
+  "Bu case 3 raunddan oluşur. Vereceğin kararlar ekip moralini, proje sağlığını, paydaş memnuniyetini ve kariyer sonucunu etkiler. Güçlü kararlar seni terfiye götürebilir; zayıf kararlar ise güven kaybına yol açabilir.";
 
 export const projects: Project[] = [
   {
@@ -36,6 +46,13 @@ export const projects: Project[] = [
     description:
       "MVP kapsamını koruyarak hızlı öğrenme, backlog önceliklendirme ve sprint riski yönetimi.",
     methodology: "Agile",
+    briefing: {
+      scenario:
+        "Yeni kurulan bir teknoloji girişiminin ilk ürün sürümünden sen sorumlusun. Şirket yatırımcı sunumuna yalnızca birkaç hafta uzaklıkta. Kurucu ekip sürekli yeni fikirler eklemek istiyor, geliştirici ekip ise sprint kapsamının kontrolden çıktığını söylüyor.\n\nCEO dün gece sana mesaj attı:\n'Bu MVP yetişmezse yatırım turunu kaybedebiliriz.'\n\nMüşterilerden gelen geri bildirimler her gün değişiyor. Takım senden net öncelikler ve hızlı kararlar bekliyor.",
+      stakes:
+        "Başarılı bir teslimat yatırım turunu açabilir ve seni şirket içinde yükseltebilir. Yanlış öncelikler ise ekibin tükenmesine ve ürünün gecikmesine neden olabilir.",
+      rules: defaultBriefingRules,
+    },
     rounds: [
       {
         roundNumber: 1,
@@ -246,6 +263,13 @@ export const projects: Project[] = [
     description:
       "Sprint ortasında değişen backlog, düşen velocity ve demo kapsamı kararları.",
     methodology: "Agile",
+    briefing: {
+      scenario:
+        "Mobil uygulama ekibi büyük demo haftasına girerken sprint planı bozulmaya başladı. Kritik özellikler hâlâ tamamlanmadı, QA ekibi bug listesinin büyüdüğünü söylüyor ve pazarlama departmanı son anda yeni talepler gönderiyor.\n\nÜrün yöneticisi sana şunu söyledi:\n'Bu demo başarısız olursa büyük müşteri anlaşmasını kaybedebiliriz.'\n\nTakım baskı altında ve herkes senden hangi işlerin gerçekten önemli olduğuna karar vermeni bekliyor.",
+      stakes:
+        "Doğru sprint yönetimi ekibi toparlayabilir ve müşteriyi etkileyebilir. Kötü kararlar ise velocity düşüşüne, teslimat krizine ve ekip motivasyonunun bozulmasına yol açabilir.",
+      rules: defaultBriefingRules,
+    },
     rounds: [
       {
         roundNumber: 1,
@@ -456,6 +480,13 @@ export const projects: Project[] = [
     description:
       "Gereksinim doğrulama, dokümantasyon uyumu ve kabul testi yönetimi.",
     methodology: "Waterfall",
+    briefing: {
+      scenario:
+        "Bir fabrikanın otomasyon sistemi teslimatı için proje yöneticisi olarak görevlendirildin. Teknik gereksinimler yüzlerce sayfalık dokümanda tanımlı ve müşteri tüm acceptance kriterlerinin eksiksiz karşılanmasını bekliyor.\n\nFabrika müdürü toplantıda açıkça şunu söyledi:\n'Sistem teslim günü çalışmazsa üretim hattı durur.'\n\nMühendislik ekibi dokümantasyon değişikliklerinden şikâyet ediyor, müşteri ise her faz sonunda resmi onay görmek istiyor.",
+      stakes:
+        "Doğru planlama ve dokümantasyon teslimatı güvenli şekilde tamamlayabilir. Hatalı gereksinim yönetimi ise maliyet artışına, kabul testlerinin başarısız olmasına ve müşteri güveninin kaybedilmesine neden olabilir.",
+      rules: defaultBriefingRules,
+    },
     rounds: [
       {
         roundNumber: 1,

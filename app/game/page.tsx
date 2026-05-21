@@ -69,6 +69,24 @@ function MethodologyBadge({ methodology }: { methodology: ProjectMethodology }) 
   );
 }
 
+function getBriefingAccent(methodology: ProjectMethodology) {
+  return methodology === "Agile"
+    ? {
+        section:
+          "border-cyan-300/20 bg-cyan-300/10 shadow-cyan-950/40 ring-cyan-300/10",
+        label: "text-cyan-300",
+        panel: "border-cyan-300/20 bg-cyan-950/30 text-cyan-100",
+        button: "bg-cyan-500 text-slate-950 hover:bg-cyan-300",
+      }
+    : {
+        section:
+          "border-amber-300/20 bg-amber-300/10 shadow-amber-950/30 ring-amber-300/10",
+        label: "text-amber-300",
+        panel: "border-amber-300/20 bg-amber-950/30 text-amber-100",
+        button: "bg-amber-400 text-slate-950 hover:bg-amber-300",
+      };
+}
+
 const methodologyCards = [
   {
     methodology: "Agile" as const,
@@ -187,6 +205,9 @@ function getEarnedBadges(
 
 export default function GamePage() {
   const [selectedProjectId, setSelectedProjectId] = useState(projects[0].id);
+  const [briefingProjectId, setBriefingProjectId] = useState<string | null>(
+    null,
+  );
   const [gameStarted, setGameStarted] = useState(false);
   const [roundIndex, setRoundIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<ProjectOption | null>(
@@ -206,6 +227,8 @@ export default function GamePage() {
 
   const currentProject =
     projects.find((project) => project.id === selectedProjectId) ?? projects[0];
+  const briefingProject =
+    projects.find((project) => project.id === briefingProjectId) ?? null;
   const round = currentProject.rounds[roundIndex];
   const isLastRound = roundIndex === currentProject.rounds.length - 1;
 
@@ -260,6 +283,7 @@ export default function GamePage() {
 
   function resetGameState(project: Project) {
     setSelectedProjectId(project.id);
+    setBriefingProjectId(null);
     setRoundIndex(0);
     setSelectedOption(null);
     setTotalScore(0);
@@ -274,6 +298,17 @@ export default function GamePage() {
   function startProject(project: Project) {
     resetGameState(project);
     setGameStarted(true);
+  }
+
+  function openCaseBriefing(project: Project) {
+    setSelectedProjectId(project.id);
+    setBriefingProjectId(project.id);
+    setGameStarted(false);
+  }
+
+  function backToCases() {
+    setBriefingProjectId(null);
+    setGameStarted(false);
   }
 
   function chooseOption(option: ProjectOption) {
@@ -396,6 +431,80 @@ export default function GamePage() {
     setGameStarted(true);
   }
 
+  if (!gameStarted && briefingProject) {
+    const accent = getBriefingAccent(briefingProject.methodology);
+
+    return (
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
+        <section
+          className={`rounded-lg border p-6 shadow-2xl ring-1 ${accent.section}`}
+        >
+          <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
+            <div>
+              <p
+                className={`text-sm font-medium uppercase tracking-wide ${accent.label}`}
+              >
+                Case Briefing
+              </p>
+              <h1 className="mt-2 text-3xl font-bold text-white">
+                {briefingProject.title}
+              </h1>
+              <div className="mt-4">
+                <MethodologyBadge methodology={briefingProject.methodology} />
+              </div>
+            </div>
+            <CareerAvatar careerLevelIndex={careerLevel} size="lg" />
+          </div>
+
+          <div className="mt-8 grid gap-5 lg:grid-cols-[1.4fr_0.9fr]">
+            <div className="rounded-lg border border-white/10 bg-slate-950/50 p-5 shadow-xl shadow-slate-950/30">
+              <h2 className="text-lg font-bold text-white">Scenario</h2>
+              <div className="mt-4 grid gap-4 text-sm leading-7 text-slate-200">
+                {briefingProject.briefing.scenario
+                  .split("\n\n")
+                  .map((paragraph) => (
+                    <p key={paragraph}>{paragraph}</p>
+                  ))}
+              </div>
+            </div>
+
+            <div className="grid gap-5">
+              <div className={`rounded-lg border p-5 ${accent.panel}`}>
+                <h2 className="text-lg font-bold text-white">
+                  What&apos;s at Stake?
+                </h2>
+                <p className="mt-3 text-sm leading-7">
+                  {briefingProject.briefing.stakes}
+                </p>
+              </div>
+
+              <div className="rounded-lg border border-white/10 bg-slate-950/50 p-5 text-sm leading-7 text-slate-300">
+                {briefingProject.briefing.rules}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <button
+              type="button"
+              onClick={() => startProject(briefingProject)}
+              className={`inline-flex h-12 items-center justify-center rounded-md px-6 font-semibold transition-colors ${accent.button}`}
+            >
+              Start Case
+            </button>
+            <button
+              type="button"
+              onClick={backToCases}
+              className="inline-flex h-12 items-center justify-center rounded-md border border-white/10 bg-white/[0.03] px-6 font-semibold text-slate-100 transition-colors hover:border-cyan-300/40 hover:bg-cyan-300/10"
+            >
+              Back to Cases
+            </button>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
   if (!gameStarted) {
     return (
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
@@ -498,10 +607,10 @@ export default function GamePage() {
                 </p>
                 <button
                   type="button"
-                  onClick={() => setSelectedProjectId(project.id)}
+                  onClick={() => openCaseBriefing(project)}
                   className="mt-5 inline-flex h-11 items-center justify-center rounded-md border border-white/10 bg-white/[0.03] px-4 font-semibold text-slate-100 transition-colors hover:border-cyan-300/40 hover:bg-cyan-300/10"
                 >
-                  {isSelected ? "Seçili Case" : "Case Seç"}
+                  {isSelected ? "Briefing Aç" : "Case Seç"}
                 </button>
               </article>
             );
@@ -511,10 +620,10 @@ export default function GamePage() {
         <section className="flex flex-col gap-3 sm:flex-row">
           <button
             type="button"
-            onClick={() => startProject(currentProject)}
+            onClick={() => openCaseBriefing(currentProject)}
             className="inline-flex h-12 items-center justify-center rounded-md bg-cyan-500 px-6 font-semibold text-slate-950 transition-colors hover:bg-cyan-300"
           >
-            Oyuna Başla
+            Briefing Aç
           </button>
           <Link
             href="/profile"
