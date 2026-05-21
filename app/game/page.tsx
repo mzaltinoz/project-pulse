@@ -399,6 +399,36 @@ export default function GamePage() {
   if (!gameStarted) {
     return (
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
+        <section className="rounded-lg border border-cyan-300/20 bg-cyan-300/10 p-6 shadow-2xl shadow-cyan-950/30 ring-1 ring-cyan-300/10">
+          <p className="text-sm font-medium uppercase tracking-wide text-cyan-300">
+            Challenge briefing
+          </p>
+          <h1 className="mt-2 text-3xl font-bold text-white">
+            Project Manager Challenge
+          </h1>
+          <p className="mt-3 max-w-4xl leading-7 text-slate-200">
+            Her case 3 raunddan oluşur. Her raundda proje yöneticisi olarak
+            bir karar verirsin. En dengeli ve profesyonel kararları seçmeye
+            çalış. Başarılı olursan XP, rozet ve terfi kazanırsın; zayıf
+            kararlar ise kariyer sonucunu stabil tutabilir veya sorumluluğunu
+            azaltabilir.
+          </p>
+          <div className="mt-5 grid gap-3 md:grid-cols-3">
+            {[
+              "3 raund boyunca karar ver",
+              "Agile ve Waterfall mantığını doğru uygula",
+              "Sonuçta yıldız, XP, rozet ve kariyer sonucu kazan",
+            ].map((item) => (
+              <div
+                key={item}
+                className="rounded-md border border-white/10 bg-slate-950/40 px-4 py-3 text-sm font-semibold text-slate-100"
+              >
+                {item}
+              </div>
+            ))}
+          </div>
+        </section>
+
         <section className="rounded-lg border border-white/10 bg-slate-900/70 p-6 shadow-2xl shadow-cyan-950/30 ring-1 ring-cyan-300/10">
           <p className="text-sm font-medium uppercase tracking-wide text-cyan-300">
             Case selection
@@ -442,6 +472,10 @@ export default function GamePage() {
         <section className="grid gap-4 lg:grid-cols-3">
           {projects.map((project) => {
             const isSelected = project.id === selectedProjectId;
+            const caseFocus =
+              project.methodology === "Agile"
+                ? "Belirsizlik, sprint kapsamı ve geri bildirim yönetimine odaklan."
+                : "Gereksinim, dokümantasyon ve kabul kriterlerine odaklan.";
 
             return (
               <article
@@ -458,6 +492,9 @@ export default function GamePage() {
                 </div>
                 <p className="mt-3 flex-1 leading-7 text-slate-300">
                   {project.description}
+                </p>
+                <p className="mt-4 rounded-md border border-white/10 bg-slate-950/40 p-3 text-sm font-medium text-slate-200">
+                  {caseFocus}
                 </p>
                 <button
                   type="button"

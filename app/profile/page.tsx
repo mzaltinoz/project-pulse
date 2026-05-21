@@ -42,7 +42,6 @@ export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileError, setProfileError] = useState("");
-  const [profileLoaded, setProfileLoaded] = useState(false);
   const isSupabaseConfigured = hasSupabaseConfig();
 
   useEffect(() => {
@@ -73,15 +72,17 @@ export default function ProfilePage() {
         const profile = await getOrCreateProfile(supabaseClient, currentUser);
         if (isMounted) {
           setProgress(profileToProgress(profile));
-          setProfileLoaded(!profile.isFallback);
           if (profile.isFallback) {
-            setProfileError("Cloud profile could not be loaded yet.");
+            setProfileError(
+              "Hesabın bağlı. İlk case tamamlandıktan sonra ilerlemen senkronize edilecek.",
+            );
           }
         }
       } catch {
         if (isMounted) {
-          setProfileLoaded(false);
-          setProfileError("Cloud profile could not be loaded yet.");
+          setProfileError(
+            "Hesabın bağlı. İlk case tamamlandıktan sonra ilerlemen senkronize edilecek.",
+          );
         }
       } finally {
         if (isMounted) {
@@ -93,7 +94,6 @@ export default function ProfilePage() {
     supabaseClient.auth.getUser().then(({ data }) => {
       if (isMounted) {
         setUser(data.user);
-        setProfileLoaded(false);
         if (data.user) {
           void loadCloudProfile(data.user);
         }
@@ -104,7 +104,6 @@ export default function ProfilePage() {
       data: { subscription },
     } = supabaseClient.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
-      setProfileLoaded(false);
       if (session?.user) {
         void loadCloudProfile(session.user);
       }
@@ -155,25 +154,12 @@ export default function ProfilePage() {
               </p>
             ) : null}
             {profileError ? (
-              <p className="mt-4 rounded-md border border-red-300/30 bg-red-500/10 p-3 text-sm font-medium text-red-200">
+              <p className="mt-4 rounded-md border border-cyan-300/20 bg-cyan-300/10 p-3 text-sm font-medium text-cyan-100">
                 {profileError}
               </p>
             ) : null}
           </div>
           <CareerAvatar careerLevelIndex={progress.careerLevelIndex} size="lg" />
-        </div>
-      </section>
-
-      <section className="rounded-lg border border-white/10 bg-slate-900/60 p-4 text-xs text-slate-300 shadow-lg shadow-cyan-950/10 ring-1 ring-cyan-300/10">
-        <p className="font-semibold uppercase tracking-wide text-cyan-300">
-          Supabase Debug
-        </p>
-        <div className="mt-3 grid gap-2 sm:grid-cols-2">
-          <p>Supabase configured: {isSupabaseConfigured ? "yes" : "no"}</p>
-          <p>Session active: {user ? "yes" : "no"}</p>
-          <p>User id: {user?.id ?? "-"}</p>
-          <p>Email: {user?.email ?? "-"}</p>
-          <p>Profile loaded: {profileLoaded ? "yes" : "no"}</p>
         </div>
       </section>
 
