@@ -16,6 +16,7 @@ export type ProfileRow = {
   earned_badges: BadgeName[] | null;
   created_at: string;
   updated_at: string;
+  isFallback?: boolean;
 };
 
 export type ProgressUpdate = {
@@ -23,6 +24,36 @@ export type ProgressUpdate = {
   careerLevelIndex: number;
   earnedBadges: BadgeName[];
 };
+
+function getUsername(user: User) {
+  if (typeof user.user_metadata?.username === "string") {
+    return user.user_metadata.username;
+  }
+
+  if (typeof user.user_metadata?.name === "string") {
+    return user.user_metadata.name;
+  }
+
+  return null;
+}
+
+function createDefaultProfile(user: User): ProfileRow {
+  const now = new Date().toISOString();
+
+  return {
+    id: user.id,
+    email: user.email ?? null,
+    username: getUsername(user),
+    role: "user",
+    total_xp: defaultProgress.totalXp,
+    career_level_index: defaultProgress.careerLevelIndex,
+    completed_projects: defaultProgress.completedProjects,
+    earned_badges: defaultProgress.earnedBadges,
+    created_at: now,
+    updated_at: now,
+    isFallback: true,
+  };
+}
 
 export function profileToProgress(profile: ProfileRow): ProgressData {
   return {
@@ -39,6 +70,7 @@ export async function getOrCreateProfile(
   supabase: SupabaseClient,
   user: User,
 ) {
+  const defaultProfile = createDefaultProfile(user);
   const { data: existingProfile, error: selectError } = await supabase
     .from("profiles")
     .select("*")
@@ -46,7 +78,7 @@ export async function getOrCreateProfile(
     .maybeSingle<ProfileRow>();
 
   if (selectError) {
-    throw selectError;
+    console.error("Could not select profile", selectError);
   }
 
   if (existingProfile) {
@@ -55,24 +87,28 @@ export async function getOrCreateProfile(
 
   const { data: createdProfile, error: insertError } = await supabase
     .from("profiles")
-    .insert({
-      id: user.id,
-      email: user.email,
-      username:
-        typeof user.user_metadata?.username === "string"
-          ? user.user_metadata.username
-          : typeof user.user_metadata?.name === "string"
-            ? user.user_metadata.name
-            : null,
-    })
+    .upsert(
+      {
+        id: defaultProfile.id,
+        email: defaultProfile.email,
+        username: defaultProfile.username,
+        role: defaultProfile.role,
+        total_xp: defaultProfile.total_xp,
+        career_level_index: defaultProfile.career_level_index,
+        completed_projects: defaultProfile.completed_projects,
+        earned_badges: defaultProfile.earned_badges,
+      },
+      { onConflict: "id" },
+    )
     .select("*")
     .single<ProfileRow>();
 
   if (insertError) {
-    throw insertError;
+    console.error("Could not upsert profile", insertError);
+    return defaultProfile;
   }
 
-  return createdProfile;
+  return createdProfile ?? defaultProfile;
 }
 
 export async function updateProfileProgress(

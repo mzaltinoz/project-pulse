@@ -71,10 +71,13 @@ export default function ProfilePage() {
         const profile = await getOrCreateProfile(supabaseClient, currentUser);
         if (isMounted) {
           setProgress(profileToProgress(profile));
+          if (profile.isFallback) {
+            setProfileError("Cloud profile could not be loaded yet.");
+          }
         }
       } catch {
         if (isMounted) {
-          setProfileError("Could not load cloud profile.");
+          setProfileError("Cloud profile could not be loaded yet.");
         }
       } finally {
         if (isMounted) {

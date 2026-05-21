@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient, hasSupabaseConfig } from "@/lib/supabase/client";
+import { getOrCreateProfile } from "@/lib/supabase/profileService";
 
 type RegisterForm = {
   username: string;
@@ -64,6 +65,10 @@ export default function RegisterPage() {
 
     setError("");
 
+    if (data.user) {
+      await getOrCreateProfile(supabase, data.user);
+    }
+
     if (data.session) {
       router.push("/profile");
       router.refresh();
@@ -71,8 +76,9 @@ export default function RegisterPage() {
     }
 
     setMessage(
-      "Kayıt oluşturuldu. Lütfen giriş yapın veya email doğrulamasını kontrol edin.",
+      "Kayıt oluşturuldu. Lütfen email doğrulamasını tamamladıktan sonra giriş yapın.",
     );
+    router.push("/login?registered=1");
   }
 
   return (

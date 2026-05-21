@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createClient, hasSupabaseConfig } from "@/lib/supabase/client";
 
 type LoginForm = {
@@ -17,7 +17,27 @@ export default function LoginPage() {
     password: "",
   });
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const isSupabaseConfigured = hasSupabaseConfig();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    let noticeTimer: number | undefined;
+
+    if (params.get("registered") === "1") {
+      noticeTimer = window.setTimeout(() => {
+        setNotice(
+          "Kayıt oluşturuldu. Lütfen email doğrulamasını tamamladıktan sonra giriş yapın.",
+        );
+      }, 0);
+    }
+
+    return () => {
+      if (noticeTimer) {
+        window.clearTimeout(noticeTimer);
+      }
+    };
+  }, []);
 
   function updateField(field: keyof LoginForm, value: string) {
     setForm((currentForm) => ({
@@ -31,6 +51,7 @@ export default function LoginPage() {
 
     if (!form.email.trim() || !form.password.trim()) {
       setError("Email ve password alanlarını doldur.");
+      setNotice("");
       return;
     }
 
@@ -38,6 +59,7 @@ export default function LoginPage() {
 
     if (!supabase) {
       setError("Supabase configuration missing");
+      setNotice("");
       return;
     }
 
@@ -48,10 +70,12 @@ export default function LoginPage() {
 
     if (loginError) {
       setError("Giriş başarısız. Email veya şifreyi kontrol edin.");
+      setNotice("");
       return;
     }
 
     setError("");
+    setNotice("");
     router.push("/profile");
     router.refresh();
   }
@@ -96,6 +120,11 @@ export default function LoginPage() {
 
           {error ? (
             <p className="text-sm font-medium text-red-300">{error}</p>
+          ) : null}
+          {notice ? (
+            <p className="rounded-md border border-emerald-300/30 bg-emerald-300/10 p-3 text-sm font-medium text-emerald-100">
+              {notice}
+            </p>
           ) : null}
 
           <button
