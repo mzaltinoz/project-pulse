@@ -285,6 +285,7 @@ export default function GamePage() {
       metrics,
     );
     let newBadges: BadgeName[] = [];
+    let shouldSaveLocalFallback = !user;
 
     if (user) {
       const supabase = createClient();
@@ -311,10 +312,20 @@ export default function GamePage() {
 
           newBadges = savedProgress.newBadges;
         } catch {
-          setCloudError("Could not save cloud progress.");
+          setCloudError(
+            "Cloud progress could not be saved, but your local progress is safe.",
+          );
+          shouldSaveLocalFallback = true;
         }
+      } else {
+        setCloudError(
+          "Cloud progress could not be saved, but your local progress is safe.",
+        );
+        shouldSaveLocalFallback = true;
       }
-    } else {
+    }
+
+    if (shouldSaveLocalFallback) {
       const savedProgress = saveGameProgress(
         baseResult.earnedXp,
         nextCareerLevel,

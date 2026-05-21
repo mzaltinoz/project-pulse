@@ -25,6 +25,22 @@ export type ProgressUpdate = {
   earnedBadges: BadgeName[];
 };
 
+type SupabaseErrorDetails = {
+  message?: string;
+  code?: string;
+  details?: string;
+  hint?: string;
+};
+
+function logSupabaseError(context: string, error: SupabaseErrorDetails) {
+  console.error(context, {
+    message: error.message,
+    code: error.code,
+    details: error.details,
+    hint: error.hint,
+  });
+}
+
 function getUsername(user: User) {
   if (typeof user.user_metadata?.username === "string") {
     return user.user_metadata.username;
@@ -78,7 +94,7 @@ export async function getOrCreateProfile(
     .maybeSingle<ProfileRow>();
 
   if (selectError) {
-    console.error("Could not select profile", selectError);
+    logSupabaseError("Could not select profile", selectError);
   }
 
   if (existingProfile) {
@@ -104,7 +120,7 @@ export async function getOrCreateProfile(
     .single<ProfileRow>();
 
   if (insertError) {
-    console.error("Could not upsert profile", insertError);
+    logSupabaseError("Could not upsert profile", insertError);
     return defaultProfile;
   }
 
@@ -123,23 +139,27 @@ export async function updateProfileProgress(
     .single<ProfileRow>();
 
   if (selectError) {
+    logSupabaseError("Could not select profile before progress update", selectError);
     throw selectError;
   }
 
+  const currentTotalXp = profile.total_xp ?? 0;
+  const currentCompletedProjects = profile.completed_projects ?? 0;
   const existingBadges = profile.earned_badges ?? [];
+  const earnedBadges = progressUpdate.earnedBadges ?? [];
   const mergedBadges = Array.from(
-    new Set([...existingBadges, ...progressUpdate.earnedBadges]),
+    new Set([...existingBadges, ...earnedBadges]),
   );
-  const newBadges = progressUpdate.earnedBadges.filter(
+  const newBadges = earnedBadges.filter(
     (badge) => !existingBadges.includes(badge),
   );
 
   const { data: updatedProfile, error: updateError } = await supabase
     .from("profiles")
     .update({
-      total_xp: profile.total_xp + progressUpdate.earnedXp,
-      completed_projects: profile.completed_projects + 1,
-      career_level_index: progressUpdate.careerLevelIndex,
+      total_xp: currentTotalXp + (progressUpdate.earnedXp ?? 0),
+      completed_projects: currentCompletedProjects + 1,
+      career_level_index: progressUpdate.careerLevelIndex ?? 0,
       earned_badges: mergedBadges,
       updated_at: new Date().toISOString(),
     })
@@ -148,6 +168,7 @@ export async function updateProfileProgress(
     .single<ProfileRow>();
 
   if (updateError) {
+    logSupabaseError("Could not update profile progress", updateError);
     throw updateError;
   }
 
