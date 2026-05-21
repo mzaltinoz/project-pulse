@@ -69,6 +69,35 @@ export default function ProfilePage() {
       </section>
 
       <section className="rounded-lg border border-white/10 bg-slate-900/70 p-5 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-medium text-slate-400">
+              Kazanılan rozetler
+            </p>
+            <h2 className="mt-1 text-xl font-bold text-white">
+              {progress.earnedBadges.length} rozet
+            </h2>
+          </div>
+        </div>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {progress.earnedBadges.length > 0 ? (
+            progress.earnedBadges.map((badge) => (
+              <div
+                key={badge}
+                className="rounded-lg border border-cyan-300/20 bg-cyan-300/10 p-4 text-sm font-semibold text-cyan-100"
+              >
+                {badge}
+              </div>
+            ))
+          ) : (
+            <p className="text-sm text-slate-400">
+              Henüz rozet kazanılmadı. Bir projeyi tamamlayarak başlayabilirsin.
+            </p>
+          )}
+        </div>
+      </section>
+
+      <section className="rounded-lg border border-white/10 bg-slate-900/70 p-5 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10">
         <div className="flex flex-col gap-3 sm:flex-row">
           <Link
             href="/game"

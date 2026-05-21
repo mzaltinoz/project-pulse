@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { CareerAvatar } from "@/components/CareerAvatar";
+import { MetricsPanel } from "@/components/MetricsPanel";
+import { initialMetrics } from "@/metrics";
 import {
   careerLevels,
   defaultProgress,
@@ -56,6 +58,9 @@ export default function Home() {
             {progress.totalXp} XP · {progress.completedProjects} tamamlanan
             proje
           </p>
+          <p className="mt-1 text-sm text-cyan-300">
+            {progress.earnedBadges.length} rozet kazanıldı
+          </p>
         </div>
 
         <div className="rounded-lg border border-white/10 bg-slate-900/70 p-5 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10">
@@ -83,6 +88,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <MetricsPanel metrics={initialMetrics} />
     </div>
   );
 }

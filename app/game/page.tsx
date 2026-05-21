@@ -3,8 +3,11 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { CareerAvatar } from "@/components/CareerAvatar";
+import { MetricsPanel } from "@/components/MetricsPanel";
 import { projects, type ProjectOption } from "@/data/projects";
+import { clampMetric, initialMetrics, type MetricScores } from "@/metrics";
 import {
+  type BadgeName,
   careerLevels,
   defaultProgress,
   getProgress,
@@ -15,7 +18,7 @@ const project = projects[0];
 
 type CareerResult = "Terfi" | "Stabil" | "Görevin Azalması";
 
-type GameResult = {
+type BaseGameResult = {
   stars: number;
   earnedXp: number;
   careerResult: CareerResult;
@@ -23,10 +26,14 @@ type GameResult = {
   feedback: string;
 };
 
+type GameResult = BaseGameResult & {
+  newBadges: BadgeName[];
+};
+
 function getResultForScore(
   score: number,
   currentCareerLevel: number,
-): GameResult {
+): BaseGameResult {
   if (score >= 60) {
     const newCareerLevel = Math.min(
       currentCareerLevel + 1,
@@ -66,6 +73,56 @@ function getResultForScore(
   };
 }
 
+function applyMetricEffects(
+  metrics: MetricScores,
+  option: ProjectOption,
+): MetricScores {
+  return {
+    projectHealth: clampMetric(
+      metrics.projectHealth + option.metricEffects.projectHealth,
+    ),
+    teamMorale: clampMetric(metrics.teamMorale + option.metricEffects.teamMorale),
+    stakeholderSatisfaction: clampMetric(
+      metrics.stakeholderSatisfaction +
+        option.metricEffects.stakeholderSatisfaction,
+    ),
+    deliveryFocus: clampMetric(
+      metrics.deliveryFocus + option.metricEffects.deliveryFocus,
+    ),
+  };
+}
+
+function getEarnedBadges(
+  methodology: string,
+  stars: number,
+  score: number,
+  metrics: MetricScores,
+): BadgeName[] {
+  const badges: BadgeName[] = [];
+
+  if (methodology === "Agile" && stars === 3) {
+    badges.push("Agile Mindset");
+  }
+
+  if (methodology === "Waterfall" && stars === 3) {
+    badges.push("Waterfall Discipline");
+  }
+
+  if (score > 60) {
+    badges.push("Deadline Saver");
+  }
+
+  if (metrics.teamMorale > 70) {
+    badges.push("Team Builder");
+  }
+
+  if (metrics.projectHealth > 70) {
+    badges.push("Scope Guardian");
+  }
+
+  return badges;
+}
+
 export default function GamePage() {
   const [roundIndex, setRoundIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<ProjectOption | null>(
@@ -77,6 +134,7 @@ export default function GamePage() {
     defaultProgress.careerLevelIndex,
   );
   const [gameResult, setGameResult] = useState<GameResult | null>(null);
+  const [metrics, setMetrics] = useState<MetricScores>(initialMetrics);
 
   const round = project.rounds[roundIndex];
   const isLastRound = roundIndex === project.rounds.length - 1;
@@ -98,6 +156,7 @@ export default function GamePage() {
 
     setSelectedOption(option);
     setTotalScore((currentScore) => currentScore + option.score);
+    setMetrics((currentMetrics) => applyMetricEffects(currentMetrics, option));
   }
 
   function goToNextRound() {
@@ -106,10 +165,24 @@ export default function GamePage() {
   }
 
   function showResultScreen() {
-    const result = getResultForScore(totalScore, careerLevel);
-    const nextCareerLevel = careerLevels.indexOf(result.newTitle);
+    const baseResult = getResultForScore(totalScore, careerLevel);
+    const nextCareerLevel = careerLevels.indexOf(baseResult.newTitle);
+    const earnedBadges = getEarnedBadges(
+      project.methodology,
+      baseResult.stars,
+      totalScore,
+      metrics,
+    );
+    const savedProgress = saveGameProgress(
+      baseResult.earnedXp,
+      nextCareerLevel,
+      earnedBadges,
+    );
+    const result = {
+      ...baseResult,
+      newBadges: savedProgress.newBadges,
+    };
 
-    saveGameProgress(result.earnedXp, nextCareerLevel);
     setCareerLevel(nextCareerLevel);
     setGameResult(result);
     setShowResults(true);
@@ -121,6 +194,7 @@ export default function GamePage() {
     setTotalScore(0);
     setShowResults(false);
     setGameResult(null);
+    setMetrics(initialMetrics);
   }
 
   if (showResults && gameResult) {
@@ -167,6 +241,26 @@ export default function GamePage() {
             <p className="mt-2 text-3xl font-bold text-white">{totalScore}</p>
           </div>
         </section>
+
+        <MetricsPanel metrics={metrics} />
+
+        {gameResult.newBadges.length > 0 ? (
+          <section className="rounded-lg border border-cyan-300/30 bg-cyan-300/10 p-5 shadow-xl shadow-cyan-950/20">
+            <p className="text-sm font-medium uppercase tracking-wide text-cyan-200">
+              New Badge Unlocked
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {gameResult.newBadges.map((badge) => (
+                <span
+                  key={badge}
+                  className="rounded-md border border-cyan-300/30 bg-slate-950/40 px-3 py-2 text-sm font-semibold text-cyan-100"
+                >
+                  {badge}
+                </span>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         <section className="rounded-lg border border-white/10 bg-slate-900/70 p-6 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10">
           <p className="leading-7 text-slate-300">{gameResult.feedback}</p>
@@ -215,6 +309,8 @@ export default function GamePage() {
         <h2 className="mt-2 text-xl font-semibold text-white">Senaryo</h2>
         <p className="mt-3 leading-7 text-slate-300">{round.scenario}</p>
       </section>
+
+      <MetricsPanel metrics={metrics} />
 
       <section className="grid gap-3">
         {round.options.map((option) => (

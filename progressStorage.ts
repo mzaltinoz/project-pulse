@@ -2,7 +2,15 @@ export type ProgressData = {
   totalXp: number;
   careerLevelIndex: number;
   completedProjects: number;
+  earnedBadges: BadgeName[];
 };
+
+export type BadgeName =
+  | "Agile Mindset"
+  | "Waterfall Discipline"
+  | "Deadline Saver"
+  | "Team Builder"
+  | "Scope Guardian";
 
 export const careerLevels = [
   "Junior Project Coordinator",
@@ -17,6 +25,7 @@ export const defaultProgress: ProgressData = {
   totalXp: 0,
   careerLevelIndex: 0,
   completedProjects: 0,
+  earnedBadges: [],
 };
 
 function normalizeProgress(progress: Partial<ProgressData>): ProgressData {
@@ -32,6 +41,7 @@ function normalizeProgress(progress: Partial<ProgressData>): ProgressData {
     completedProjects: Number(
       progress.completedProjects ?? defaultProgress.completedProjects,
     ),
+    earnedBadges: Array.from(new Set(progress.earnedBadges ?? [])),
   };
 }
 
@@ -57,17 +67,30 @@ export function saveProgress(progress: ProgressData) {
   window.localStorage.setItem(storageKey, JSON.stringify(progress));
 }
 
-export function saveGameProgress(earnedXp: number, careerLevelIndex: number) {
+export function saveGameProgress(
+  earnedXp: number,
+  careerLevelIndex: number,
+  unlockedBadges: BadgeName[] = [],
+) {
   const currentProgress = getProgress();
+  const earnedBadges = Array.from(
+    new Set([...currentProgress.earnedBadges, ...unlockedBadges]),
+  );
   const nextProgress = normalizeProgress({
     totalXp: currentProgress.totalXp + earnedXp,
     careerLevelIndex,
     completedProjects: currentProgress.completedProjects + 1,
+    earnedBadges,
   });
 
   saveProgress(nextProgress);
 
-  return nextProgress;
+  return {
+    progress: nextProgress,
+    newBadges: unlockedBadges.filter(
+      (badge) => !currentProgress.earnedBadges.includes(badge),
+    ),
+  };
 }
 
 export function resetProgress() {
