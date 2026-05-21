@@ -95,6 +95,7 @@ export async function getOrCreateProfile(
 
   if (selectError) {
     logSupabaseError("Could not select profile", selectError);
+    return defaultProfile;
   }
 
   if (existingProfile) {
@@ -141,6 +142,17 @@ export async function updateProfileProgress(
   if (selectError) {
     logSupabaseError("Could not select profile before progress update", selectError);
     throw selectError;
+  }
+
+  if (!profile) {
+    const missingProfileError = new Error("Profile row was not found.");
+    console.error("Could not select profile before progress update", {
+      message: missingProfileError.message,
+      code: undefined,
+      details: `No profile row for user id ${userId}`,
+      hint: "Ensure profiles.id matches auth.users.id and RLS allows authenticated users to select their own row.",
+    });
+    throw missingProfileError;
   }
 
   const currentTotalXp = profile.total_xp ?? 0;

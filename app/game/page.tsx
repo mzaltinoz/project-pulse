@@ -1,6 +1,5 @@
 "use client";
 
-import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { CareerAvatar } from "@/components/CareerAvatar";
@@ -11,7 +10,7 @@ import {
   type ProjectMethodology,
   type ProjectOption,
 } from "@/data/projects";
-import { createClient } from "@/lib/supabase/client";
+import { createClient, hasSupabaseConfig } from "@/lib/supabase/client";
 import {
   getOrCreateProfile,
   updateProfileProgress,
@@ -39,6 +38,23 @@ type BaseGameResult = {
 type GameResult = BaseGameResult & {
   newBadges: BadgeName[];
 };
+
+function getErrorMessage(error: unknown) {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof error.message === "string"
+  ) {
+    return error.message;
+  }
+
+  return "Unknown Supabase error";
+}
 
 function MethodologyBadge({ methodology }: { methodology: ProjectMethodology }) {
   const className =
@@ -183,8 +199,10 @@ export default function GamePage() {
   );
   const [gameResult, setGameResult] = useState<GameResult | null>(null);
   const [metrics, setMetrics] = useState<MetricScores>(initialMetrics);
-  const [user, setUser] = useState<User | null>(null);
   const [cloudError, setCloudError] = useState("");
+  const [cloudStatus, setCloudStatus] = useState("");
+  const [isSavingCloudProgress, setIsSavingCloudProgress] = useState(false);
+  const isSupabaseConfigured = hasSupabaseConfig();
 
   const currentProject =
     projects.find((project) => project.id === selectedProjectId) ?? projects[0];
@@ -216,8 +234,6 @@ export default function GamePage() {
         return;
       }
 
-      setUser(data.user);
-
       if (data.user) {
         try {
           const profile = await getOrCreateProfile(supabaseClient, data.user);
@@ -234,9 +250,7 @@ export default function GamePage() {
 
     const {
       data: { subscription },
-    } = supabaseClient.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
+    } = supabaseClient.auth.onAuthStateChange(() => {});
 
     return () => {
       isMounted = false;
@@ -253,6 +267,8 @@ export default function GamePage() {
     setGameResult(null);
     setMetrics(initialMetrics);
     setCloudError("");
+    setCloudStatus("");
+    setIsSavingCloudProgress(false);
   }
 
   function startProject(project: Project) {
@@ -285,43 +301,74 @@ export default function GamePage() {
       metrics,
     );
     let newBadges: BadgeName[] = [];
-    let shouldSaveLocalFallback = !user;
+    let shouldSaveLocalFallback = false;
+    setCloudError("");
+    setCloudStatus("");
 
-    if (user) {
-      const supabase = createClient();
+    const supabase = createClient();
 
-      if (supabase) {
-        try {
-          await getOrCreateProfile(supabase, user);
-          const savedProgress = await updateProfileProgress(supabase, user.id, {
-            earnedXp: baseResult.earnedXp,
-            careerLevelIndex: nextCareerLevel,
-            earnedBadges,
-          });
+    if (!supabase) {
+      setCloudError("Supabase env missing");
+      shouldSaveLocalFallback = true;
+    } else {
+      setIsSavingCloudProgress(true);
+      setCloudStatus("Saving cloud progress...");
+
+      try {
+        const { data: sessionData, error: sessionError } =
+          await supabase.auth.getSession();
+
+        if (sessionError) {
+          throw sessionError;
+        }
+
+        const sessionUser = sessionData.session?.user;
+
+        if (!sessionUser) {
+          setCloudStatus(
+            "No Supabase session found; saved as guest local progress.",
+          );
+          shouldSaveLocalFallback = true;
+        } else {
+          const profile = await getOrCreateProfile(supabase, sessionUser);
+
+          if (profile.isFallback) {
+            throw new Error("Profile row could not be loaded or created.");
+          }
+
+          const savedProgress = await updateProfileProgress(
+            supabase,
+            sessionUser.id,
+            {
+              earnedXp: baseResult.earnedXp,
+              careerLevelIndex: nextCareerLevel,
+              earnedBadges,
+            },
+          );
 
           await insertUserProgress(supabase, {
-            user_id: user.id,
-            project_id: currentProject.id,
-            project_title: currentProject.title,
-            methodology: currentProject.methodology,
-            stars: baseResult.stars,
-            xp_earned: baseResult.earnedXp,
-            result: baseResult.careerResult,
-            final_score: totalScore,
+            user_id: sessionUser.id,
+            project_id: currentProject.id ?? "",
+            project_title: currentProject.title ?? "",
+            methodology: currentProject.methodology ?? "",
+            stars: baseResult.stars ?? 0,
+            xp_earned: baseResult.earnedXp ?? 0,
+            result: baseResult.careerResult ?? "",
+            final_score: totalScore ?? 0,
           });
 
           newBadges = savedProgress.newBadges;
-        } catch {
-          setCloudError(
-            "Cloud progress could not be saved, but your local progress is safe.",
-          );
-          shouldSaveLocalFallback = true;
+          setCloudStatus("Cloud progress saved.");
         }
-      } else {
+      } catch (error) {
+        const message = getErrorMessage(error);
+        console.error("Cloud progress save failed", error);
         setCloudError(
-          "Cloud progress could not be saved, but your local progress is safe.",
+          `Cloud progress could not be saved, but your local progress is safe. ${message}`,
         );
         shouldSaveLocalFallback = true;
+      } finally {
+        setIsSavingCloudProgress(false);
       }
     }
 
@@ -439,6 +486,12 @@ export default function GamePage() {
             Profil Sayfası
           </Link>
         </section>
+
+        {!isSupabaseConfigured ? (
+          <p className="rounded-md border border-amber-300/30 bg-amber-300/10 p-3 text-sm font-medium text-amber-100">
+            Supabase env missing
+          </p>
+        ) : null}
       </div>
     );
   }
@@ -512,6 +565,11 @@ export default function GamePage() {
         ) : null}
 
         <section className="rounded-lg border border-white/10 bg-slate-900/70 p-6 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10">
+          {cloudStatus ? (
+            <p className="mb-4 rounded-md border border-cyan-300/30 bg-cyan-300/10 p-3 text-sm font-medium text-cyan-100">
+              {cloudStatus}
+            </p>
+          ) : null}
           {cloudError ? (
             <p className="mb-4 rounded-md border border-red-300/30 bg-red-500/10 p-3 text-sm font-medium text-red-200">
               {cloudError}
@@ -602,9 +660,22 @@ export default function GamePage() {
 
       {selectedOption ? (
         <section className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="grid gap-2">
+            {!isSupabaseConfigured ? (
+              <p className="rounded-md border border-amber-300/30 bg-amber-300/10 p-3 text-sm font-medium text-amber-100">
+                Supabase env missing
+              </p>
+            ) : null}
+            {cloudStatus ? (
+              <p className="rounded-md border border-cyan-300/30 bg-cyan-300/10 p-3 text-sm font-medium text-cyan-100">
+                {cloudStatus}
+              </p>
+            ) : null}
+          </div>
           <button
             type="button"
             onClick={isLastRound ? showResultScreen : goToNextRound}
+            disabled={isSavingCloudProgress}
             className="inline-flex h-12 items-center justify-center rounded-md bg-cyan-500 px-6 font-semibold text-slate-950 transition-colors hover:bg-cyan-300"
           >
             {isLastRound ? "Sonuçları Gör" : "Sonraki Raund"}

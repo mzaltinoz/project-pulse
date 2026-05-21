@@ -58,12 +58,12 @@ export default function LoginPage() {
     const supabase = createClient();
 
     if (!supabase) {
-      setError("Supabase configuration missing");
+      setError("Supabase env missing");
       setNotice("");
       return;
     }
 
-    const { error: loginError } = await supabase.auth.signInWithPassword({
+    const { data, error: loginError } = await supabase.auth.signInWithPassword({
       email: form.email.trim(),
       password: form.password,
     });
@@ -73,6 +73,17 @@ export default function LoginPage() {
       setNotice("");
       return;
     }
+
+    if (!data.session || !data.user) {
+      setError("Giriş başarılı görünse de Supabase session oluşmadı.");
+      setNotice("");
+      return;
+    }
+
+    console.log("Supabase login user", {
+      id: data.user.id,
+      email: data.user.email,
+    });
 
     setError("");
     setNotice("");
@@ -137,7 +148,7 @@ export default function LoginPage() {
 
         {!isSupabaseConfigured ? (
           <p className="mt-4 rounded-md border border-amber-300/30 bg-amber-300/10 p-3 text-sm font-medium text-amber-100">
-            Supabase configuration missing
+            Supabase env missing
           </p>
         ) : null}
 

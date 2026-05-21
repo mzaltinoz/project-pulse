@@ -4,13 +4,26 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient, hasSupabaseConfig } from "@/lib/supabase/client";
-import { getOrCreateProfile } from "@/lib/supabase/profileService";
 
 type RegisterForm = {
   username: string;
   email: string;
   password: string;
 };
+
+function logSupabaseError(context: string, error: {
+  message?: string;
+  code?: string;
+  details?: string;
+  hint?: string;
+}) {
+  console.error(context, {
+    message: error.message,
+    code: error.code,
+    details: error.details,
+    hint: error.hint,
+  });
+}
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -42,7 +55,7 @@ export default function RegisterPage() {
     const supabase = createClient();
 
     if (!supabase) {
-      setError("Supabase configuration missing");
+      setError("Supabase env missing");
       setMessage("");
       return;
     }
@@ -66,7 +79,26 @@ export default function RegisterPage() {
     setError("");
 
     if (data.user) {
-      await getOrCreateProfile(supabase, data.user);
+      const { error: profileError } = await supabase.from("profiles").upsert(
+        {
+          id: data.user.id,
+          email: data.user.email ?? form.email.trim(),
+          username: form.username.trim(),
+          role: "user",
+          total_xp: 0,
+          career_level_index: 0,
+          completed_projects: 0,
+          earned_badges: [],
+        },
+        { onConflict: "id" },
+      );
+
+      if (profileError) {
+        logSupabaseError("Profile creation failed", profileError);
+        setError(`Profile creation failed: ${profileError.message}`);
+        setMessage("");
+        return;
+      }
     }
 
     if (data.session) {
@@ -145,7 +177,7 @@ export default function RegisterPage() {
 
         {!isSupabaseConfigured ? (
           <p className="mt-4 rounded-md border border-amber-300/30 bg-amber-300/10 p-3 text-sm font-medium text-amber-100">
-            Supabase configuration missing
+            Supabase env missing
           </p>
         ) : null}
 
