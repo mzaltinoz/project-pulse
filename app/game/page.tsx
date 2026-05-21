@@ -4,7 +4,12 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { CareerAvatar } from "@/components/CareerAvatar";
 import { MetricsPanel } from "@/components/MetricsPanel";
-import { projects, type ProjectOption } from "@/data/projects";
+import {
+  projects,
+  type Project,
+  type ProjectMethodology,
+  type ProjectOption,
+} from "@/data/projects";
 import { clampMetric, initialMetrics, type MetricScores } from "@/metrics";
 import {
   type BadgeName,
@@ -13,8 +18,6 @@ import {
   getProgress,
   saveGameProgress,
 } from "@/progressStorage";
-
-const project = projects[0];
 
 type CareerResult = "Terfi" | "Stabil" | "Görevin Azalması";
 
@@ -29,6 +32,19 @@ type BaseGameResult = {
 type GameResult = BaseGameResult & {
   newBadges: BadgeName[];
 };
+
+function MethodologyBadge({ methodology }: { methodology: ProjectMethodology }) {
+  const className =
+    methodology === "Agile"
+      ? "border-cyan-800 bg-cyan-950 text-cyan-300"
+      : "border-amber-800 bg-amber-950 text-amber-300";
+
+  return (
+    <span className={`rounded-full border px-3 py-1 text-xs font-bold ${className}`}>
+      {methodology}
+    </span>
+  );
+}
 
 function getResultForScore(
   score: number,
@@ -93,7 +109,7 @@ function applyMetricEffects(
 }
 
 function getEarnedBadges(
-  methodology: string,
+  methodology: ProjectMethodology,
   stars: number,
   score: number,
   metrics: MetricScores,
@@ -124,6 +140,8 @@ function getEarnedBadges(
 }
 
 export default function GamePage() {
+  const [selectedProjectId, setSelectedProjectId] = useState(projects[0].id);
+  const [gameStarted, setGameStarted] = useState(false);
   const [roundIndex, setRoundIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<ProjectOption | null>(
     null,
@@ -136,8 +154,10 @@ export default function GamePage() {
   const [gameResult, setGameResult] = useState<GameResult | null>(null);
   const [metrics, setMetrics] = useState<MetricScores>(initialMetrics);
 
-  const round = project.rounds[roundIndex];
-  const isLastRound = roundIndex === project.rounds.length - 1;
+  const currentProject =
+    projects.find((project) => project.id === selectedProjectId) ?? projects[0];
+  const round = currentProject.rounds[roundIndex];
+  const isLastRound = roundIndex === currentProject.rounds.length - 1;
 
   useEffect(() => {
     const loadProgress = window.setTimeout(() => {
@@ -148,6 +168,21 @@ export default function GamePage() {
       window.clearTimeout(loadProgress);
     };
   }, []);
+
+  function resetGameState(project: Project) {
+    setSelectedProjectId(project.id);
+    setRoundIndex(0);
+    setSelectedOption(null);
+    setTotalScore(0);
+    setShowResults(false);
+    setGameResult(null);
+    setMetrics(initialMetrics);
+  }
+
+  function startProject(project: Project) {
+    resetGameState(project);
+    setGameStarted(true);
+  }
 
   function chooseOption(option: ProjectOption) {
     if (selectedOption) {
@@ -168,7 +203,7 @@ export default function GamePage() {
     const baseResult = getResultForScore(totalScore, careerLevel);
     const nextCareerLevel = careerLevels.indexOf(baseResult.newTitle);
     const earnedBadges = getEarnedBadges(
-      project.methodology,
+      currentProject.methodology,
       baseResult.stars,
       totalScore,
       metrics,
@@ -189,12 +224,75 @@ export default function GamePage() {
   }
 
   function restartGame() {
-    setRoundIndex(0);
-    setSelectedOption(null);
-    setTotalScore(0);
-    setShowResults(false);
-    setGameResult(null);
-    setMetrics(initialMetrics);
+    resetGameState(currentProject);
+    setGameStarted(true);
+  }
+
+  if (!gameStarted) {
+    return (
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
+        <section className="rounded-lg border border-white/10 bg-slate-900/70 p-6 shadow-2xl shadow-cyan-950/30 ring-1 ring-cyan-300/10">
+          <p className="text-sm font-medium uppercase tracking-wide text-cyan-300">
+            Case selection
+          </p>
+          <h1 className="mt-2 text-3xl font-bold text-white">
+            Agile ve Waterfall case seçimi
+          </h1>
+          <p className="mt-2 max-w-3xl text-slate-300">
+            Agile iteration ve Waterfall phase disiplinini karşılaştıran bir
+            case seç. Oyuna Başla dediğinde raund, skor ve metrikler sıfırlanır.
+          </p>
+        </section>
+
+        <section className="grid gap-4 lg:grid-cols-3">
+          {projects.map((project) => {
+            const isSelected = project.id === selectedProjectId;
+
+            return (
+              <article
+                key={project.id}
+                className={`flex flex-col rounded-lg border bg-slate-900/70 p-5 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10 transition-all hover:-translate-y-0.5 hover:border-cyan-300/40 ${
+                  isSelected ? "border-cyan-300/50" : "border-white/10"
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <h2 className="text-xl font-bold text-white">
+                    {project.title}
+                  </h2>
+                  <MethodologyBadge methodology={project.methodology} />
+                </div>
+                <p className="mt-3 flex-1 leading-7 text-slate-300">
+                  {project.description}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setSelectedProjectId(project.id)}
+                  className="mt-5 inline-flex h-11 items-center justify-center rounded-md border border-white/10 bg-white/[0.03] px-4 font-semibold text-slate-100 transition-colors hover:border-cyan-300/40 hover:bg-cyan-300/10"
+                >
+                  {isSelected ? "Seçili Case" : "Case Seç"}
+                </button>
+              </article>
+            );
+          })}
+        </section>
+
+        <section className="flex flex-col gap-3 sm:flex-row">
+          <button
+            type="button"
+            onClick={() => startProject(currentProject)}
+            className="inline-flex h-12 items-center justify-center rounded-md bg-cyan-500 px-6 font-semibold text-slate-950 transition-colors hover:bg-cyan-300"
+          >
+            Oyuna Başla
+          </button>
+          <Link
+            href="/profile"
+            className="inline-flex h-12 items-center justify-center rounded-md border border-white/10 bg-white/[0.03] px-6 font-semibold text-slate-100 transition-colors hover:border-cyan-300/40 hover:bg-cyan-300/10"
+          >
+            Profil Sayfası
+          </Link>
+        </section>
+      </div>
+    );
   }
 
   if (showResults && gameResult) {
@@ -203,9 +301,12 @@ export default function GamePage() {
         <section className="rounded-lg border border-white/10 bg-slate-900/70 p-6 shadow-2xl shadow-cyan-950/30 ring-1 ring-cyan-300/10">
           <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-sm font-medium uppercase tracking-wide text-cyan-300">
-                {project.title}
-              </p>
+              <div className="flex flex-wrap items-center gap-3">
+                <p className="text-sm font-medium uppercase tracking-wide text-cyan-300">
+                  {currentProject.title}
+                </p>
+                <MethodologyBadge methodology={currentProject.methodology} />
+              </div>
               <h1 className="mt-2 text-3xl font-bold text-white">Sonuçlar</h1>
               <p className="mt-2 text-slate-300">
                 Yeni unvan: {gameResult.newTitle}
@@ -289,12 +390,14 @@ export default function GamePage() {
       <section className="rounded-lg border border-white/10 bg-slate-900/70 p-6 shadow-2xl shadow-cyan-950/30 ring-1 ring-cyan-300/10">
         <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-sm font-medium uppercase tracking-wide text-cyan-300">
-              {project.methodology} · Raund {round.roundNumber} /{" "}
-              {project.rounds.length}
-            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <p className="text-sm font-medium uppercase tracking-wide text-cyan-300">
+                Raund {round.roundNumber} / {currentProject.rounds.length}
+              </p>
+              <MethodologyBadge methodology={currentProject.methodology} />
+            </div>
             <h1 className="mt-2 text-3xl font-bold text-white">
-              {project.title}
+              {currentProject.title}
             </h1>
             <p className="mt-2 text-sm font-medium text-slate-400">
               Toplam skor: {totalScore}
