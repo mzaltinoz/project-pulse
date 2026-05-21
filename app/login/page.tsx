@@ -26,7 +26,7 @@ export default function LoginPage() {
     }));
   }
 
-  function handleFakeLogin(event: React.FormEvent<HTMLFormElement>) {
+  async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!form.email.trim() || !form.password.trim()) {
@@ -34,15 +34,6 @@ export default function LoginPage() {
       return;
     }
 
-    setError("");
-    router.push("/profile");
-  }
-
-  function continueAsDemo() {
-    router.push("/game");
-  }
-
-  async function continueWithGoogle() {
     const supabase = createClient();
 
     if (!supabase) {
@@ -50,17 +41,23 @@ export default function LoginPage() {
       return;
     }
 
-    const redirectTo = `${window.location.origin}/auth/callback`;
-    const { error: oauthError } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo,
-      },
+    const { error: loginError } = await supabase.auth.signInWithPassword({
+      email: form.email.trim(),
+      password: form.password,
     });
 
-    if (oauthError) {
-      setError(oauthError.message);
+    if (loginError) {
+      setError("Giriş başarısız. Email veya şifreyi kontrol edin.");
+      return;
     }
+
+    setError("");
+    router.push("/profile");
+    router.refresh();
+  }
+
+  function continueAsDemo() {
+    router.push("/game");
   }
 
   return (
@@ -71,10 +68,10 @@ export default function LoginPage() {
         </p>
         <h1 className="mt-3 text-3xl font-bold text-white">Giriş Yap</h1>
         <p className="mt-2 text-slate-300">
-          Şimdilik fake login akışı. Gerçek auth daha sonra bağlanabilir.
+          Email ve password ile giriş yap veya demo olarak devam et.
         </p>
 
-        <form onSubmit={handleFakeLogin} className="mt-6 grid gap-4">
+        <form onSubmit={handleLogin} className="mt-6 grid gap-4">
           <label className="grid gap-2 text-sm font-medium text-slate-300">
             Email
             <input
@@ -97,7 +94,9 @@ export default function LoginPage() {
             />
           </label>
 
-          {error ? <p className="text-sm font-medium text-red-300">{error}</p> : null}
+          {error ? (
+            <p className="text-sm font-medium text-red-300">{error}</p>
+          ) : null}
 
           <button
             type="submit"
@@ -112,14 +111,6 @@ export default function LoginPage() {
             Supabase configuration missing
           </p>
         ) : null}
-
-        <button
-          type="button"
-          onClick={continueWithGoogle}
-          className="mt-3 inline-flex h-12 w-full items-center justify-center rounded-md border border-cyan-300/30 bg-cyan-300/10 px-6 font-semibold text-cyan-100 transition-colors hover:bg-cyan-300/20"
-        >
-          Continue with Google
-        </button>
 
         <button
           type="button"

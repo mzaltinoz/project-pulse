@@ -59,9 +59,11 @@ export async function getOrCreateProfile(
       id: user.id,
       email: user.email,
       username:
-        typeof user.user_metadata?.name === "string"
-          ? user.user_metadata.name
-          : null,
+        typeof user.user_metadata?.username === "string"
+          ? user.user_metadata.username
+          : typeof user.user_metadata?.name === "string"
+            ? user.user_metadata.name
+            : null,
     })
     .select("*")
     .single<ProfileRow>();

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { createClient, hasSupabaseConfig } from "@/lib/supabase/client";
 
 type RegisterForm = {
   username: string;
@@ -18,6 +19,8 @@ export default function RegisterPage() {
     password: "",
   });
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const isSupabaseConfigured = hasSupabaseConfig();
 
   function updateField(field: keyof RegisterForm, value: string) {
     setForm((currentForm) => ({
@@ -26,16 +29,50 @@ export default function RegisterPage() {
     }));
   }
 
-  function handleFakeRegister(event: React.FormEvent<HTMLFormElement>) {
+  async function handleRegister(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!form.username.trim() || !form.email.trim() || !form.password.trim()) {
       setError("Kullanıcı adı, email ve password alanlarını doldur.");
+      setMessage("");
+      return;
+    }
+
+    const supabase = createClient();
+
+    if (!supabase) {
+      setError("Supabase configuration missing");
+      setMessage("");
+      return;
+    }
+
+    const { data, error: registerError } = await supabase.auth.signUp({
+      email: form.email.trim(),
+      password: form.password,
+      options: {
+        data: {
+          username: form.username.trim(),
+        },
+      },
+    });
+
+    if (registerError) {
+      setError(registerError.message);
+      setMessage("");
       return;
     }
 
     setError("");
-    router.push("/profile");
+
+    if (data.session) {
+      router.push("/profile");
+      router.refresh();
+      return;
+    }
+
+    setMessage(
+      "Kayıt oluşturuldu. Lütfen giriş yapın veya email doğrulamasını kontrol edin.",
+    );
   }
 
   return (
@@ -46,10 +83,10 @@ export default function RegisterPage() {
         </p>
         <h1 className="mt-3 text-3xl font-bold text-white">Kayıt Ol</h1>
         <p className="mt-2 text-slate-300">
-          Hesap ekranı taslak durumda. Backend daha sonra eklenebilir.
+          Email ve password ile Project Pulse hesabı oluştur.
         </p>
 
-        <form onSubmit={handleFakeRegister} className="mt-6 grid gap-4">
+        <form onSubmit={handleRegister} className="mt-6 grid gap-4">
           <label className="grid gap-2 text-sm font-medium text-slate-300">
             Kullanıcı adı
             <input
@@ -83,7 +120,14 @@ export default function RegisterPage() {
             />
           </label>
 
-          {error ? <p className="text-sm font-medium text-red-300">{error}</p> : null}
+          {error ? (
+            <p className="text-sm font-medium text-red-300">{error}</p>
+          ) : null}
+          {message ? (
+            <p className="rounded-md border border-emerald-300/30 bg-emerald-300/10 p-3 text-sm font-medium text-emerald-100">
+              {message}
+            </p>
+          ) : null}
 
           <button
             type="submit"
@@ -92,6 +136,12 @@ export default function RegisterPage() {
             Kayıt Ol
           </button>
         </form>
+
+        {!isSupabaseConfigured ? (
+          <p className="mt-4 rounded-md border border-amber-300/30 bg-amber-300/10 p-3 text-sm font-medium text-amber-100">
+            Supabase configuration missing
+          </p>
+        ) : null}
 
         <p className="mt-6 text-sm text-slate-300">
           Zaten hesabın var mı?{" "}
