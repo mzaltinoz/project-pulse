@@ -19,6 +19,14 @@ export type ProfileRow = {
   isFallback?: boolean;
 };
 
+type ProfileValueMap = ProfileRow & {
+  totalXp?: number | null;
+  totalXP?: number | null;
+  careerLevelIndex?: number | null;
+  completedProjects?: number | null;
+  earnedBadges?: BadgeName[] | null;
+};
+
 export type ProgressUpdate = {
   earnedXp: number;
   careerLevelIndex: number;
@@ -78,13 +86,26 @@ function createDefaultProfile(user: User): ProfileRow {
 }
 
 export function profileToProgress(profile: ProfileRow): ProgressData {
+  const mappedProfile = profile as ProfileValueMap;
+
   return {
-    totalXp: profile.total_xp ?? defaultProgress.totalXp,
+    totalXp:
+      mappedProfile.total_xp ??
+      mappedProfile.totalXp ??
+      mappedProfile.totalXP ??
+      defaultProgress.totalXp,
     careerLevelIndex:
-      profile.career_level_index ?? defaultProgress.careerLevelIndex,
+      mappedProfile.career_level_index ??
+      mappedProfile.careerLevelIndex ??
+      defaultProgress.careerLevelIndex,
     completedProjects:
-      profile.completed_projects ?? defaultProgress.completedProjects,
-    earnedBadges: profile.earned_badges ?? defaultProgress.earnedBadges,
+      mappedProfile.completed_projects ??
+      mappedProfile.completedProjects ??
+      defaultProgress.completedProjects,
+    earnedBadges:
+      mappedProfile.earned_badges ??
+      mappedProfile.earnedBadges ??
+      defaultProgress.earnedBadges,
     projectStars: defaultProgress.projectStars,
   };
 }
@@ -99,6 +120,9 @@ export async function getOrCreateProfile(
     .select("*")
     .eq("id", user.id)
     .maybeSingle<ProfileRow>();
+
+  console.log("Supabase'den okunan ham veri:", existingProfile);
+  console.error("Supabase okuma hatası varsa:", selectError);
 
   if (selectError) {
     logSupabaseError("Could not select profile", selectError);
@@ -145,6 +169,9 @@ export async function updateProfileProgress(
     .select("*")
     .eq("id", userId)
     .single<ProfileRow>();
+
+  console.log("Supabase'den okunan ham veri:", profile);
+  console.error("Supabase okuma hatası varsa:", selectError);
 
   if (selectError) {
     logSupabaseError("Could not select profile before progress update", selectError);

@@ -44,6 +44,9 @@ export async function getUserProgress(
     .eq("user_id", userId)
     .order("completed_at", { ascending: false });
 
+  console.log("Supabase'den okunan ham veri:", data);
+  console.error("Supabase okuma hatası varsa:", error);
+
   if (error) {
     logSupabaseError("Could not load user progress", error);
     throw error;

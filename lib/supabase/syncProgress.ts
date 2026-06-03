@@ -62,12 +62,21 @@ function progressRowsToProjectStars(
 ) {
   return progressRows.reduce<ProgressData["projectStars"]>(
     (starsByProject, progressRecord) => {
-      const projectId = String(progressRecord.project_id ?? "");
+      const mappedRecord = progressRecord as typeof progressRecord & {
+        projectId?: string | null;
+        projectID?: string | null;
+      };
+      const projectId = String(
+        mappedRecord.project_id ??
+          mappedRecord.projectId ??
+          mappedRecord.projectID ??
+          "",
+      );
 
       if (projectId) {
         starsByProject[projectId] = Math.max(
           starsByProject[projectId] ?? 0,
-          Number(progressRecord.stars ?? 0),
+          Number(mappedRecord.stars ?? 0),
         );
       }
 
@@ -93,6 +102,9 @@ async function getCloudProgressOnly(supabase: SupabaseClient, userId: string) {
   if (profileResult.error) {
     logSupabaseError("Could not load cloud profile for read-only sync", profileResult.error);
   }
+
+  console.log("Supabase'den okunan ham veri:", profileResult.data);
+  console.error("Supabase okuma hatası varsa:", profileResult.error);
 
   const cloudProgress = profileResult.data
     ? profileToProgress(profileResult.data)
