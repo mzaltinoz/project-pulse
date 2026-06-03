@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient, hasSupabaseConfig } from "@/lib/supabase/client";
+import { resetProgress } from "@/progressStorage";
 
 const links = [
   { href: "/", label: "Dashboard" },
@@ -48,7 +49,16 @@ export function Sidebar() {
 
   async function handleLogout() {
     const supabase = createClient();
-    await supabase?.auth.signOut();
+    const { error } = supabase
+      ? await supabase.auth.signOut()
+      : { error: null };
+
+    if (error) {
+      console.error("Supabase logout failed", error);
+      return;
+    }
+
+    resetProgress();
     setUser(null);
     router.push("/");
     router.refresh();
