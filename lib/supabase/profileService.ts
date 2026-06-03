@@ -79,6 +79,7 @@ export function profileToProgress(profile: ProfileRow): ProgressData {
     completedProjects:
       profile.completed_projects ?? defaultProgress.completedProjects,
     earnedBadges: profile.earned_badges ?? defaultProgress.earnedBadges,
+    projectStars: defaultProgress.projectStars,
   };
 }
 

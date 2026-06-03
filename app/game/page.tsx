@@ -15,7 +15,10 @@ import {
   getOrCreateProfile,
   updateProfileProgress,
 } from "@/lib/supabase/profileService";
-import { insertUserProgress } from "@/lib/supabase/progressService";
+import {
+  getUserProgress,
+  insertUserProgress,
+} from "@/lib/supabase/progressService";
 import { clampMetric, initialMetrics, type MetricScores } from "@/metrics";
 import {
   type BadgeName,
@@ -24,6 +27,8 @@ import {
   getProgress,
   saveGameProgress,
 } from "@/progressStorage";
+
+const basicProjectIds = projects.slice(0, 3).map((project) => project.id);
 
 type CareerResult = "Terfi" | "Stabil" | "Görevin Azalması";
 
@@ -63,6 +68,10 @@ const badgeLabels: Record<BadgeName, string> = {
   "Team Builder": "Ekip Geliştirici",
   "Scope Guardian": "Kapsam Koruyucusu",
 };
+
+function areAdvancedProjectsUnlocked(projectStars: Record<string, number>) {
+  return basicProjectIds.every((projectId) => (projectStars[projectId] ?? 0) >= 3);
+}
 
 function MethodologyBadge({ methodology }: { methodology: ProjectMethodology }) {
   const className =
@@ -228,10 +237,12 @@ export default function GamePage() {
   );
   const [gameResult, setGameResult] = useState<GameResult | null>(null);
   const [metrics, setMetrics] = useState<MetricScores>(initialMetrics);
+  const [projectStars, setProjectStars] = useState<Record<string, number>>({});
   const [cloudError, setCloudError] = useState("");
   const [cloudStatus, setCloudStatus] = useState("");
   const [isSavingCloudProgress, setIsSavingCloudProgress] = useState(false);
   const isSupabaseConfigured = hasSupabaseConfig();
+  const areAdvancedUnlocked = areAdvancedProjectsUnlocked(projectStars);
 
   const currentProject =
     projects.find((project) => project.id === selectedProjectId) ?? projects[0];
@@ -242,7 +253,9 @@ export default function GamePage() {
 
   useEffect(() => {
     const loadProgress = window.setTimeout(() => {
-      setCareerLevel(getProgress().careerLevelIndex);
+      const progress = getProgress();
+      setCareerLevel(progress.careerLevelIndex);
+      setProjectStars(progress.projectStars);
     }, 0);
 
     return () => {
@@ -270,6 +283,28 @@ export default function GamePage() {
           const profile = await getOrCreateProfile(supabaseClient, data.user);
           if (isMounted) {
             setCareerLevel(profile.career_level_index);
+          }
+
+          const userProgress = await getUserProgress(supabaseClient, data.user.id);
+
+          if (isMounted) {
+            const cloudProjectStars = userProgress.reduce<Record<string, number>>(
+              (starsByProject, progressRecord) => {
+                const projectId = String(progressRecord.project_id ?? "");
+                starsByProject[projectId] = Math.max(
+                  starsByProject[projectId] ?? 0,
+                  Number(progressRecord.stars ?? 0),
+                );
+
+                return starsByProject;
+              },
+              {},
+            );
+
+            setProjectStars((currentStars) => ({
+              ...currentStars,
+              ...cloudProjectStars,
+            }));
           }
         } catch {
           if (isMounted) {
@@ -304,11 +339,19 @@ export default function GamePage() {
   }
 
   function startProject(project: Project) {
+    if (project.isAdvanced && !areAdvancedUnlocked) {
+      return;
+    }
+
     resetGameState(project);
     setGameStarted(true);
   }
 
   function openCaseBriefing(project: Project) {
+    if (project.isAdvanced && !areAdvancedUnlocked) {
+      return;
+    }
+
     setSelectedProjectId(project.id);
     setBriefingProjectId(project.id);
     setGameStarted(false);
@@ -420,9 +463,19 @@ export default function GamePage() {
         baseResult.earnedXp,
         nextCareerLevel,
         earnedBadges,
+        currentProject.id,
+        baseResult.stars,
       );
       newBadges = savedProgress.newBadges;
     }
+
+    setProjectStars((currentStars) => ({
+      ...currentStars,
+      [currentProject.id]: Math.max(
+        currentStars[currentProject.id] ?? 0,
+        baseResult.stars,
+      ),
+    }));
 
     const result = {
       ...baseResult,
@@ -586,9 +639,15 @@ export default function GamePage() {
           ))}
         </section>
 
+        <section className="rounded-lg border border-blue-500/30 bg-blue-900/20 p-4 text-sm font-medium leading-6 text-blue-200 shadow-xl shadow-blue-950/20">
+          Bilgi: İleri Seviye (Advanced Scenarios) operasyonların kilidini
+          açmak için ilk 3 temel projenin tamamını 3 yıldız ile bitirmelisiniz.
+        </section>
+
         <section className="grid gap-4 lg:grid-cols-3">
           {projects.map((project) => {
             const isSelected = project.id === selectedProjectId;
+            const isLocked = Boolean(project.isAdvanced && !areAdvancedUnlocked);
             const caseFocus =
               project.methodology === "Agile"
                 ? "Belirsizlik, Sprint kapsamı ve geri bildirim yönetimine odaklan."
@@ -597,28 +656,51 @@ export default function GamePage() {
             return (
               <article
                 key={project.id}
-                className={`flex flex-col rounded-lg border bg-slate-900/70 p-5 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10 transition-all hover:-translate-y-0.5 hover:border-cyan-300/40 ${
-                  isSelected ? "border-cyan-300/50" : "border-white/10"
+                className={`relative flex flex-col rounded-lg border bg-slate-900/70 p-5 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10 transition-all ${
+                  isLocked
+                    ? "border-white/10 opacity-50 grayscale"
+                    : `hover:-translate-y-0.5 hover:border-cyan-300/40 ${
+                        isSelected ? "border-cyan-300/50" : "border-white/10"
+                      }`
                 }`}
               >
+                {isLocked ? (
+                  <div className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full border border-slate-500/40 bg-slate-950/80 text-lg text-slate-200">
+                    🔒
+                  </div>
+                ) : null}
                 <div className="flex items-start justify-between gap-3">
                   <h2 className="text-xl font-bold text-white">
                     {project.title}
                   </h2>
-                  <MethodologyBadge methodology={project.methodology} />
+                  <div className="flex flex-wrap justify-end gap-2 pr-10">
+                    {project.isAdvanced ? (
+                      <span className="rounded-full border border-blue-400/30 bg-blue-400/10 px-3 py-1 text-xs font-bold text-blue-200">
+                        İleri Seviye
+                      </span>
+                    ) : null}
+                    <MethodologyBadge methodology={project.methodology} />
+                  </div>
                 </div>
                 <p className="mt-3 flex-1 leading-7 text-slate-300">
                   {project.description}
                 </p>
                 <p className="mt-4 rounded-md border border-white/10 bg-slate-950/40 p-3 text-sm font-medium text-slate-200">
-                  {caseFocus}
+                  {isLocked
+                    ? "Kilitli: Bu ileri seviye operasyonu açmak için ilk 3 temel projeyi 3 yıldız ile tamamla."
+                    : caseFocus}
                 </p>
                 <button
                   type="button"
+                  disabled={isLocked}
                   onClick={() => openCaseBriefing(project)}
-                  className="mt-5 inline-flex h-11 items-center justify-center rounded-md border border-white/10 bg-white/[0.03] px-4 font-semibold text-slate-100 transition-colors hover:border-cyan-300/40 hover:bg-cyan-300/10"
+                  className="mt-5 inline-flex h-11 items-center justify-center rounded-md border border-white/10 bg-white/[0.03] px-4 font-semibold text-slate-100 transition-colors hover:border-cyan-300/40 hover:bg-cyan-300/10 disabled:cursor-not-allowed disabled:hover:border-white/10 disabled:hover:bg-white/[0.03]"
                 >
-                  {isSelected ? "Bilgilendirmeyi Aç" : "Case Seç"}
+                  {isLocked
+                    ? "Kilitli"
+                    : isSelected
+                      ? "Bilgilendirmeyi Aç"
+                      : "Case Seç"}
                 </button>
               </article>
             );
