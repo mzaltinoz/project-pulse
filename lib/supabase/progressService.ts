@@ -20,12 +20,18 @@ type SupabaseErrorDetails = {
 };
 
 function logSupabaseError(context: string, error: SupabaseErrorDetails) {
-  console.error(context, {
-    message: error.message,
-    code: error.code,
-    details: error.details,
-    hint: error.hint,
-  });
+  console.error(
+    "%cSupabase database error",
+    "color: #ef4444; font-weight: 700;",
+    {
+      context,
+      message: error.message,
+      code: error.code,
+      details: error.details,
+      hint: error.hint,
+      rawError: error,
+    },
+  );
 }
 
 export async function getUserProgress(

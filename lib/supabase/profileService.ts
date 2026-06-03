@@ -33,12 +33,18 @@ type SupabaseErrorDetails = {
 };
 
 function logSupabaseError(context: string, error: SupabaseErrorDetails) {
-  console.error(context, {
-    message: error.message,
-    code: error.code,
-    details: error.details,
-    hint: error.hint,
-  });
+  console.error(
+    "%cSupabase database error",
+    "color: #ef4444; font-weight: 700;",
+    {
+      context,
+      message: error.message,
+      code: error.code,
+      details: error.details,
+      hint: error.hint,
+      rawError: error,
+    },
+  );
 }
 
 function getUsername(user: User) {
@@ -147,12 +153,18 @@ export async function updateProfileProgress(
 
   if (!profile) {
     const missingProfileError = new Error("Profile row was not found.");
-    console.error("Could not select profile before progress update", {
-      message: missingProfileError.message,
-      code: undefined,
-      details: `No profile row for user id ${userId}`,
-      hint: "Ensure profiles.id matches auth.users.id and RLS allows authenticated users to select their own row.",
-    });
+    console.error(
+      "%cSupabase database error",
+      "color: #ef4444; font-weight: 700;",
+      {
+        context: "Could not select profile before progress update",
+        message: missingProfileError.message,
+        code: undefined,
+        details: `No profile row for user id ${userId}`,
+        hint: "Ensure profiles.id matches auth.users.id and RLS allows authenticated users to select their own row.",
+        rawError: missingProfileError,
+      },
+    );
     throw missingProfileError;
   }
 
