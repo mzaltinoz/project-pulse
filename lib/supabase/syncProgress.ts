@@ -2,11 +2,13 @@ import type { SupabaseClient, User } from "@supabase/supabase-js";
 import {
   type BadgeName,
   type ProgressData,
+  defaultProgress,
   getProgress,
   saveProgress,
 } from "@/progressStorage";
 import {
   getOrCreateProfile,
+  type ProfileRow,
   profileToProgress,
 } from "@/lib/supabase/profileService";
 import { getUserProgress } from "@/lib/supabase/progressService";
@@ -69,6 +71,34 @@ function progressRowsToProjectStars(
   );
 }
 
+async function getCloudProgressOnly(supabase: SupabaseClient, userId: string) {
+  const [profileResult, cloudRows] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
+      .maybeSingle<ProfileRow>(),
+    getUserProgress(supabase, userId).catch((error) => {
+      logSupabaseError("Could not load cloud progress for read-only sync", error);
+      return [];
+    }),
+  ]);
+
+  if (profileResult.error) {
+    logSupabaseError("Could not load cloud profile for read-only sync", profileResult.error);
+  }
+
+  const cloudProgress = profileResult.data
+    ? profileToProgress(profileResult.data)
+    : defaultProgress;
+  const cloudProjectStars = progressRowsToProjectStars(cloudRows);
+
+  return {
+    ...cloudProgress,
+    projectStars: cloudProjectStars,
+  };
+}
+
 async function saveProgressToCloud(
   supabase: SupabaseClient,
   user: User,
@@ -102,8 +132,16 @@ export async function syncLocalAndCloudProgress(
   supabase: SupabaseClient,
   user: User,
 ) {
-  const [localProgress, cloudProfile, cloudRows] = await Promise.all([
-    Promise.resolve(getProgress()),
+  const localProgress = getProgress();
+
+  if (localProgress.totalXp <= 0) {
+    const cloudProgress = await getCloudProgressOnly(supabase, user.id);
+    saveProgress(cloudProgress);
+
+    return cloudProgress;
+  }
+
+  const [cloudProfile, cloudRows] = await Promise.all([
     getOrCreateProfile(supabase, user),
     getUserProgress(supabase, user.id).catch((error) => {
       logSupabaseError("Could not load cloud progress for merge", error);
