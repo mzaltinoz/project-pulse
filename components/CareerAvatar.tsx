@@ -1,10 +1,10 @@
 import { careerLevels } from "@/progressStorage";
 
 const avatarEmojiByTitle: Record<string, string> = {
-  "Junior Project Coordinator": "🧑‍💼",
-  "Assistant Project Manager": "👩‍💻",
-  "Project Manager": "🧭",
-  "Senior Project Manager": "👑",
+  "Junior Proje Koordinatörü": "🧑‍💼",
+  "Yardımcı Proje Yöneticisi": "👩‍💻",
+  "Proje Yöneticisi": "🧭",
+  "Kıdemli Proje Yöneticisi": "👑",
 };
 
 type CareerAvatarProps = {

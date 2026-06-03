@@ -1,10 +1,10 @@
 import type { MetricScores } from "@/metrics";
 
 const metricLabels: Record<keyof MetricScores, string> = {
-  projectHealth: "Project Health",
-  teamMorale: "Team Morale",
-  stakeholderSatisfaction: "Stakeholder Satisfaction",
-  deliveryFocus: "Delivery Focus",
+  projectHealth: "Proje Sağlığı",
+  teamMorale: "Ekip Morali",
+  stakeholderSatisfaction: "Paydaş Memnuniyeti",
+  deliveryFocus: "Teslimat Odaklılık",
 };
 
 function getBarColor(value: number) {

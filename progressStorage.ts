@@ -13,10 +13,10 @@ export type BadgeName =
   | "Scope Guardian";
 
 export const careerLevels = [
-  "Junior Project Coordinator",
-  "Assistant Project Manager",
-  "Project Manager",
-  "Senior Project Manager",
+  "Junior Proje Koordinatörü",
+  "Yardımcı Proje Yöneticisi",
+  "Proje Yöneticisi",
+  "Kıdemli Proje Yöneticisi",
 ];
 
 const storageKey = "project-pulse-progress";

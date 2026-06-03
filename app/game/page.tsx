@@ -53,8 +53,16 @@ function getErrorMessage(error: unknown) {
     return error.message;
   }
 
-  return "Unknown Supabase error";
+  return "Bilinmeyen Supabase hatası";
 }
+
+const badgeLabels: Record<BadgeName, string> = {
+  "Agile Mindset": "Agile Zihniyet",
+  "Waterfall Discipline": "Waterfall Disiplini",
+  "Deadline Saver": "Teslim Tarihi Kurtarıcısı",
+  "Team Builder": "Ekip Geliştirici",
+  "Scope Guardian": "Kapsam Koruyucusu",
+};
 
 function MethodologyBadge({ methodology }: { methodology: ProjectMethodology }) {
   const className =
@@ -265,7 +273,7 @@ export default function GamePage() {
           }
         } catch {
           if (isMounted) {
-            setCloudError("Could not load cloud profile.");
+            setCloudError("Bulut profili yüklenemedi.");
           }
         }
       }
@@ -343,11 +351,11 @@ export default function GamePage() {
     const supabase = createClient();
 
     if (!supabase) {
-      setCloudError("Supabase env missing");
+      setCloudError("Supabase ortam değişkenleri eksik.");
       shouldSaveLocalFallback = true;
     } else {
       setIsSavingCloudProgress(true);
-      setCloudStatus("Saving cloud progress...");
+      setCloudStatus("Bulut ilerlemesi kaydediliyor...");
 
       try {
         const { data: sessionData, error: sessionError } =
@@ -361,14 +369,14 @@ export default function GamePage() {
 
         if (!sessionUser) {
           setCloudStatus(
-            "No Supabase session found; saved as guest local progress.",
+            "Supabase oturumu bulunamadı; ilerleme misafir olarak yerel kaydedildi.",
           );
           shouldSaveLocalFallback = true;
         } else {
           const profile = await getOrCreateProfile(supabase, sessionUser);
 
           if (profile.isFallback) {
-            throw new Error("Profile row could not be loaded or created.");
+            throw new Error("Profil kaydı yüklenemedi veya oluşturulamadı.");
           }
 
           const savedProgress = await updateProfileProgress(
@@ -393,13 +401,13 @@ export default function GamePage() {
           });
 
           newBadges = savedProgress.newBadges;
-          setCloudStatus("Cloud progress saved.");
+          setCloudStatus("Bulut ilerlemesi kaydedildi.");
         }
       } catch (error) {
         const message = getErrorMessage(error);
         console.error("Cloud progress save failed", error);
         setCloudError(
-          `Cloud progress could not be saved, but your local progress is safe. ${message}`,
+          `Bulut ilerlemesi kaydedilemedi, ancak yerel ilerlemen güvende. ${message}`,
         );
         shouldSaveLocalFallback = true;
       } finally {
@@ -444,7 +452,7 @@ export default function GamePage() {
               <p
                 className={`text-sm font-medium uppercase tracking-wide ${accent.label}`}
               >
-                Case Briefing
+                Case Bilgilendirmesi
               </p>
               <h1 className="mt-2 text-3xl font-bold text-white">
                 {briefingProject.title}
@@ -458,7 +466,7 @@ export default function GamePage() {
 
           <div className="mt-8 grid gap-5 lg:grid-cols-[1.4fr_0.9fr]">
             <div className="rounded-lg border border-white/10 bg-slate-950/50 p-5 shadow-xl shadow-slate-950/30">
-              <h2 className="text-lg font-bold text-white">Scenario</h2>
+              <h2 className="text-lg font-bold text-white">Senaryo</h2>
               <div className="mt-4 grid gap-4 text-sm leading-7 text-slate-200">
                 {briefingProject.briefing.scenario
                   .split("\n\n")
@@ -471,7 +479,7 @@ export default function GamePage() {
             <div className="grid gap-5">
               <div className={`rounded-lg border p-5 ${accent.panel}`}>
                 <h2 className="text-lg font-bold text-white">
-                  What&apos;s at Stake?
+                  Risk ve Kazanım
                 </h2>
                 <p className="mt-3 text-sm leading-7">
                   {briefingProject.briefing.stakes}
@@ -490,14 +498,14 @@ export default function GamePage() {
               onClick={() => startProject(briefingProject)}
               className={`inline-flex h-12 items-center justify-center rounded-md px-6 font-semibold transition-colors ${accent.button}`}
             >
-              Start Case
+              Case Başlat
             </button>
             <button
               type="button"
               onClick={backToCases}
               className="inline-flex h-12 items-center justify-center rounded-md border border-white/10 bg-white/[0.03] px-6 font-semibold text-slate-100 transition-colors hover:border-cyan-300/40 hover:bg-cyan-300/10"
             >
-              Back to Cases
+              Case Listesine Dön
             </button>
           </div>
         </section>
@@ -510,10 +518,10 @@ export default function GamePage() {
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
         <section className="rounded-lg border border-cyan-300/20 bg-cyan-300/10 p-6 shadow-2xl shadow-cyan-950/30 ring-1 ring-cyan-300/10">
           <p className="text-sm font-medium uppercase tracking-wide text-cyan-300">
-            Challenge briefing
+            Meydan Okuma Bilgilendirmesi
           </p>
           <h1 className="mt-2 text-3xl font-bold text-white">
-            Project Manager Challenge
+            Proje Yöneticisi Meydan Okuması
           </h1>
           <p className="mt-3 max-w-4xl leading-7 text-slate-200">
             Her case 3 raunddan oluşur. Her raundda proje yöneticisi olarak
@@ -525,7 +533,7 @@ export default function GamePage() {
           <div className="mt-5 grid gap-3 md:grid-cols-3">
             {[
               "3 raund boyunca karar ver",
-              "Agile ve Waterfall mantığını doğru uygula",
+              "Agile ve Waterfall yaklaşımını doğru uygula",
               "Sonuçta yıldız, XP, rozet ve kariyer sonucu kazan",
             ].map((item) => (
               <div
@@ -540,14 +548,14 @@ export default function GamePage() {
 
         <section className="rounded-lg border border-white/10 bg-slate-900/70 p-6 shadow-2xl shadow-cyan-950/30 ring-1 ring-cyan-300/10">
           <p className="text-sm font-medium uppercase tracking-wide text-cyan-300">
-            Case selection
+            Case Seçimi
           </p>
           <h1 className="mt-2 text-3xl font-bold text-white">
-            Agile ve Waterfall case seçimi
+            Agile ve Waterfall Case Seçimi
           </h1>
           <p className="mt-2 max-w-3xl text-slate-300">
-            Agile iteration ve Waterfall phase disiplinini karşılaştıran bir
-            case seç. Oyuna Başla dediğinde raund, skor ve metrikler sıfırlanır.
+            Agile iterasyon ve Waterfall faz disiplinini karşılaştıran bir
+            case seç. Case açtığında raund, skor ve metrikler sıfırlanır.
           </p>
         </section>
 
@@ -583,8 +591,8 @@ export default function GamePage() {
             const isSelected = project.id === selectedProjectId;
             const caseFocus =
               project.methodology === "Agile"
-                ? "Belirsizlik, sprint kapsamı ve geri bildirim yönetimine odaklan."
-                : "Gereksinim, dokümantasyon ve kabul kriterlerine odaklan.";
+                ? "Belirsizlik, Sprint kapsamı ve geri bildirim yönetimine odaklan."
+                : "Requirements, Documentation ve Acceptance Criteria odağıyla ilerle.";
 
             return (
               <article
@@ -610,7 +618,7 @@ export default function GamePage() {
                   onClick={() => openCaseBriefing(project)}
                   className="mt-5 inline-flex h-11 items-center justify-center rounded-md border border-white/10 bg-white/[0.03] px-4 font-semibold text-slate-100 transition-colors hover:border-cyan-300/40 hover:bg-cyan-300/10"
                 >
-                  {isSelected ? "Briefing Aç" : "Case Seç"}
+                  {isSelected ? "Bilgilendirmeyi Aç" : "Case Seç"}
                 </button>
               </article>
             );
@@ -623,7 +631,7 @@ export default function GamePage() {
             onClick={() => openCaseBriefing(currentProject)}
             className="inline-flex h-12 items-center justify-center rounded-md bg-cyan-500 px-6 font-semibold text-slate-950 transition-colors hover:bg-cyan-300"
           >
-            Briefing Aç
+            Bilgilendirmeyi Aç
           </button>
           <Link
             href="/profile"
@@ -635,7 +643,7 @@ export default function GamePage() {
 
         {!isSupabaseConfigured ? (
           <p className="rounded-md border border-amber-300/30 bg-amber-300/10 p-3 text-sm font-medium text-amber-100">
-            Supabase env missing
+            Supabase ortam değişkenleri eksik.
           </p>
         ) : null}
       </div>
@@ -695,7 +703,7 @@ export default function GamePage() {
         {gameResult.newBadges.length > 0 ? (
           <section className="rounded-lg border border-cyan-300/30 bg-cyan-300/10 p-5 shadow-xl shadow-cyan-950/20">
             <p className="text-sm font-medium uppercase tracking-wide text-cyan-200">
-              New Badge Unlocked
+              Yeni Rozet Açıldı!
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               {gameResult.newBadges.map((badge) => (
@@ -703,7 +711,7 @@ export default function GamePage() {
                   key={badge}
                   className="rounded-md border border-cyan-300/30 bg-slate-950/40 px-3 py-2 text-sm font-semibold text-cyan-100"
                 >
-                  {badge}
+                  {badgeLabels[badge]}
                 </span>
               ))}
             </div>
@@ -788,11 +796,11 @@ export default function GamePage() {
 
       {selectedOption ? (
         <section className="rounded-lg border border-cyan-300/20 bg-cyan-300/10 p-5 shadow-xl shadow-cyan-950/20">
-          <h2 className="text-lg font-semibold text-white">Feedback</h2>
+          <h2 className="text-lg font-semibold text-white">Geri Bildirim</h2>
           <p className="mt-2 text-slate-300">{selectedOption.feedback}</p>
           <div className="mt-4 rounded-md border border-white/10 bg-slate-950/40 p-4">
             <p className="text-sm font-semibold uppercase tracking-wide text-cyan-200">
-              Why this matters
+              Neden önemli?
             </p>
             <p className="mt-2 text-sm leading-6 text-slate-300">
               {selectedOption.learningNote}
@@ -809,7 +817,7 @@ export default function GamePage() {
           <div className="grid gap-2">
             {!isSupabaseConfigured ? (
               <p className="rounded-md border border-amber-300/30 bg-amber-300/10 p-3 text-sm font-medium text-amber-100">
-                Supabase env missing
+                Supabase ortam değişkenleri eksik.
               </p>
             ) : null}
             {cloudStatus ? (

@@ -8,10 +8,10 @@ import { createClient, hasSupabaseConfig } from "@/lib/supabase/client";
 
 const links = [
   { href: "/", label: "Dashboard" },
-  { href: "/game", label: "Game" },
-  { href: "/profile", label: "Profile" },
-  { href: "/login", label: "Login" },
-  { href: "/register", label: "Register" },
+  { href: "/game", label: "Oyun" },
+  { href: "/profile", label: "Profil" },
+  { href: "/login", label: "Giriş" },
+  { href: "/register", label: "Kayıt" },
 ];
 
 export function Sidebar() {
@@ -61,7 +61,7 @@ export function Sidebar() {
           <p className="text-xs font-semibold uppercase tracking-wide text-cyan-300">
             Project Pulse
           </p>
-          <p className="mt-1 text-lg font-bold text-white">PM Simulator</p>
+          <p className="mt-1 text-lg font-bold text-white">PM Simülatörü</p>
         </Link>
 
         <nav className="flex gap-2 overflow-x-auto pb-1 md:flex-col md:overflow-visible">
@@ -95,7 +95,7 @@ export function Sidebar() {
                 <p className="truncate text-xs font-semibold text-slate-200">
                   {user.email}
                 </p>
-                <p className="text-xs text-cyan-300">Connected</p>
+                <p className="text-xs text-cyan-300">Bağlı</p>
               </div>
             </div>
             <button
@@ -103,7 +103,7 @@ export function Sidebar() {
               onClick={handleLogout}
               className="mt-3 inline-flex h-9 w-full items-center justify-center rounded-md border border-white/10 bg-slate-950/50 px-3 text-sm font-semibold text-slate-100 transition-colors hover:border-cyan-300/40 hover:bg-cyan-300/10"
             >
-              Logout
+              Çıkış Yap
             </button>
           </div>
         ) : null}

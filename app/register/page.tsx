@@ -47,7 +47,7 @@ export default function RegisterPage() {
     event.preventDefault();
 
     if (!form.username.trim() || !form.email.trim() || !form.password.trim()) {
-      setError("Kullanıcı adı, email ve password alanlarını doldur.");
+      setError("Kullanıcı adı, e-posta ve şifre alanlarını doldur.");
       setMessage("");
       return;
     }
@@ -55,7 +55,7 @@ export default function RegisterPage() {
     const supabase = createClient();
 
     if (!supabase) {
-      setError("Supabase env missing");
+      setError("Supabase ortam değişkenleri eksik.");
       setMessage("");
       return;
     }
@@ -71,7 +71,7 @@ export default function RegisterPage() {
     });
 
     if (registerError) {
-      setError(registerError.message);
+      setError("Kayıt başarısız. Bilgileri kontrol edip tekrar deneyin.");
       setMessage("");
       return;
     }
@@ -95,7 +95,7 @@ export default function RegisterPage() {
 
       if (profileError) {
         logSupabaseError("Profile creation failed", profileError);
-        setError(`Profile creation failed: ${profileError.message}`);
+        setError(`Profil oluşturulamadı: ${profileError.message}`);
         setMessage("");
         return;
       }
@@ -108,7 +108,7 @@ export default function RegisterPage() {
     }
 
     setMessage(
-      "Kayıt oluşturuldu. Lütfen email doğrulamasını tamamladıktan sonra giriş yapın.",
+      "Kayıt oluşturuldu. Lütfen e-posta doğrulamasını tamamladıktan sonra giriş yapın.",
     );
     router.push("/login?registered=1");
   }
@@ -117,11 +117,11 @@ export default function RegisterPage() {
     <div className="mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-md items-center">
       <section className="w-full rounded-lg border border-white/10 bg-slate-900/70 p-6 shadow-2xl shadow-cyan-950/30 ring-1 ring-cyan-300/10">
         <p className="text-sm font-medium uppercase tracking-wide text-cyan-300">
-          Create account
+          Hesap oluştur
         </p>
         <h1 className="mt-3 text-3xl font-bold text-white">Kayıt Ol</h1>
         <p className="mt-2 text-slate-300">
-          Email ve password ile Project Pulse hesabı oluştur.
+          E-posta ve şifre ile Project Pulse hesabı oluştur.
         </p>
 
         <form onSubmit={handleRegister} className="mt-6 grid gap-4">
@@ -132,29 +132,29 @@ export default function RegisterPage() {
               value={form.username}
               onChange={(event) => updateField("username", event.target.value)}
               className="h-11 rounded-md border border-white/10 bg-slate-950/70 px-3 text-base text-slate-100 outline-none transition-colors placeholder:text-slate-500 focus:border-cyan-300/60"
-              placeholder="projectlead"
+              placeholder="proje-lideri"
             />
           </label>
 
           <label className="grid gap-2 text-sm font-medium text-slate-300">
-            Email
+            E-posta
             <input
               type="email"
               value={form.email}
               onChange={(event) => updateField("email", event.target.value)}
               className="h-11 rounded-md border border-white/10 bg-slate-950/70 px-3 text-base text-slate-100 outline-none transition-colors placeholder:text-slate-500 focus:border-cyan-300/60"
-              placeholder="you@example.com"
+              placeholder="ornek@eposta.com"
             />
           </label>
 
           <label className="grid gap-2 text-sm font-medium text-slate-300">
-            Password
+            Şifre
             <input
               type="password"
               value={form.password}
               onChange={(event) => updateField("password", event.target.value)}
               className="h-11 rounded-md border border-white/10 bg-slate-950/70 px-3 text-base text-slate-100 outline-none transition-colors placeholder:text-slate-500 focus:border-cyan-300/60"
-              placeholder="••••••••"
+              placeholder="Şifren"
             />
           </label>
 
@@ -177,7 +177,7 @@ export default function RegisterPage() {
 
         {!isSupabaseConfigured ? (
           <p className="mt-4 rounded-md border border-amber-300/30 bg-amber-300/10 p-3 text-sm font-medium text-amber-100">
-            Supabase env missing
+            Supabase ortam değişkenleri eksik.
           </p>
         ) : null}
 

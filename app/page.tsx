@@ -34,14 +34,14 @@ export default function Home() {
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
       <section className="rounded-lg border border-white/10 bg-slate-900/70 p-6 shadow-2xl shadow-cyan-950/30 ring-1 ring-cyan-300/10 backdrop-blur">
         <p className="text-sm font-medium uppercase tracking-wide text-cyan-300">
-          Project management game
+          Proje yönetimi oyunu
         </p>
         <div className="mt-4 flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-4xl font-bold text-white">Project Pulse</h1>
             <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-300">
               Ekip, zaman ve risk kararları vererek proje yönetimi
-              reflekslerini geliştirdiğin kısa seçim tabanlı bir oyun.
+              reflekslerini geliştireceğin kısa, seçim tabanlı bir deneyim.
             </p>
           </div>
           <CareerAvatar careerLevelIndex={progress.careerLevelIndex} size="lg" />
@@ -64,7 +64,7 @@ export default function Home() {
         </div>
 
         <div className="rounded-lg border border-white/10 bg-slate-900/70 p-5 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10">
-          <p className="text-sm font-medium text-slate-400">Hızlı işlemler</p>
+          <p className="text-sm font-medium text-slate-400">Hızlı İşlemler</p>
           <div className="mt-4 flex flex-col gap-3 sm:flex-row">
             <Link
               href="/game"
@@ -93,20 +93,20 @@ export default function Home() {
 
       <section className="rounded-lg border border-white/10 bg-slate-900/70 p-6 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10">
         <p className="text-sm font-medium uppercase tracking-wide text-cyan-300">
-          Learning Mode
+          Öğrenme Modu
         </p>
         <h2 className="mt-2 text-2xl font-bold text-white">
-          Learn by Managing
+          Yöneterek Öğren
         </h2>
         <p className="mt-3 max-w-3xl leading-7 text-slate-300">
-          Make project decisions, see their consequences, and improve your
-          project management judgment across Agile and Waterfall scenarios.
+          Proje kararları ver, sonuçlarını gör ve Agile ile Waterfall
+          senaryolarında proje yönetimi muhakemeni geliştir.
         </p>
         <div className="mt-5 grid gap-3 md:grid-cols-3">
           {[
-            "Practice methodology selection",
-            "Improve stakeholder decisions",
-            "Build career progress through XP and badges",
+            "Metodoloji seçimini pratik et",
+            "Paydaş kararlarını güçlendir",
+            "XP ve rozetlerle kariyer ilerlemesi oluştur",
           ].map((item) => (
             <div
               key={item}

@@ -19,23 +19,31 @@ import {
 
 function getManagementStyle(earnedBadges?: string[]) {
   if (earnedBadges?.includes("Agile Mindset")) {
-    return "Agile Facilitator";
+    return "Agile Kolaylaştırıcı";
   }
 
   if (earnedBadges?.includes("Waterfall Discipline")) {
-    return "Structured Planner";
+    return "Yapısal Planlayıcı";
   }
 
   if (earnedBadges?.includes("Deadline Saver")) {
-    return "Delivery-Focused Manager";
+    return "Teslimat Odaklı Yönetici";
   }
 
   if (earnedBadges?.includes("Team Builder")) {
-    return "Team-Oriented Leader";
+    return "Ekip Odaklı Lider";
   }
 
-  return "Emerging Project Manager";
+  return "Gelişmekte Olan Proje Yöneticisi";
 }
+
+const badgeLabels: Record<string, string> = {
+  "Agile Mindset": "Agile Zihniyet",
+  "Waterfall Discipline": "Waterfall Disiplini",
+  "Deadline Saver": "Teslim Tarihi Kurtarıcısı",
+  "Team Builder": "Ekip Geliştirici",
+  "Scope Guardian": "Kapsam Koruyucusu",
+};
 
 export default function ProfilePage() {
   const [progress, setProgress] = useState<ProgressData>(defaultProgress);
@@ -129,7 +137,7 @@ export default function ProfilePage() {
         <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-sm font-medium uppercase tracking-wide text-cyan-300">
-              Profile
+              Profil
             </p>
             <h1 className="mt-2 text-3xl font-bold text-white">Profil</h1>
             <p className="mt-2 text-slate-300">
@@ -138,19 +146,19 @@ export default function ProfilePage() {
             {user ? (
               <div className="mt-4 flex flex-wrap items-center gap-3">
                 <span className="rounded-full border border-emerald-300/30 bg-emerald-300/10 px-3 py-1 text-xs font-bold text-emerald-200">
-                  Connected Account
+                  Bağlı Hesap
                 </span>
                 <span className="text-sm text-slate-300">{user.email}</span>
               </div>
             ) : null}
             {profileLoading ? (
               <p className="mt-4 text-sm font-medium text-slate-300">
-                Loading profile...
+                Profil yükleniyor...
               </p>
             ) : null}
             {!isSupabaseConfigured ? (
               <p className="mt-4 rounded-md border border-amber-300/30 bg-amber-300/10 p-3 text-sm font-medium text-amber-100">
-                Supabase env missing
+                Supabase ortam değişkenleri eksik.
               </p>
             ) : null}
             {profileError ? (
@@ -165,27 +173,27 @@ export default function ProfilePage() {
 
       <section className="grid gap-4 md:grid-cols-4">
         <div className="rounded-lg border border-white/10 bg-slate-900/70 p-5 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10">
-          <p className="text-sm font-medium text-slate-400">Total XP</p>
+          <p className="text-sm font-medium text-slate-400">Toplam XP</p>
           <p className="mt-2 text-3xl font-bold text-white">
             {progress.totalXp}
           </p>
         </div>
         <div className="rounded-lg border border-white/10 bg-slate-900/70 p-5 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10">
           <p className="text-sm font-medium text-slate-400">
-            Completed Projects
+            Tamamlanan Projeler
           </p>
           <p className="mt-2 text-3xl font-bold text-white">
             {progress.completedProjects}
           </p>
         </div>
         <div className="rounded-lg border border-white/10 bg-slate-900/70 p-5 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10">
-          <p className="text-sm font-medium text-slate-400">Earned Badges</p>
+          <p className="text-sm font-medium text-slate-400">Kazanılan Rozetler</p>
           <p className="mt-2 text-3xl font-bold text-white">
             {progress.earnedBadges.length}
           </p>
         </div>
         <div className="rounded-lg border border-white/10 bg-slate-900/70 p-5 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10">
-          <p className="text-sm font-medium text-slate-400">Current Title</p>
+          <p className="text-sm font-medium text-slate-400">Mevcut Unvan</p>
           <p className="mt-2 text-xl font-bold text-white">
             {currentTitle}
           </p>
@@ -193,14 +201,14 @@ export default function ProfilePage() {
       </section>
 
       <section className="rounded-lg border border-white/10 bg-slate-900/70 p-5 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10">
-        <p className="text-sm font-medium text-slate-400">Management Style</p>
+        <p className="text-sm font-medium text-slate-400">Yönetim Stili</p>
         <p className="mt-2 text-2xl font-bold text-cyan-200">
           {managementStyle}
         </p>
       </section>
 
       <section className="rounded-lg border border-white/10 bg-slate-900/70 p-5 shadow-xl shadow-cyan-950/20 ring-1 ring-cyan-300/10">
-        <p className="text-sm font-medium text-slate-400">Career Timeline</p>
+        <p className="text-sm font-medium text-slate-400">Kariyer Zaman Çizelgesi</p>
         <div className="mt-5 grid gap-4 md:grid-cols-4">
           {careerLevels.map((level, index) => {
             const isComplete = index < progress.careerLevelIndex;
@@ -224,7 +232,7 @@ export default function ProfilePage() {
                 />
                 <p className="text-sm font-bold text-white">{level}</p>
                 <p className="mt-2 text-xs text-slate-400">
-                  {isCurrent ? "Current level" : isComplete ? "Completed" : "Locked"}
+                  {isCurrent ? "Mevcut seviye" : isComplete ? "Tamamlandı" : "Kilitli"}
                 </p>
               </div>
             );
@@ -250,7 +258,7 @@ export default function ProfilePage() {
                 key={badge}
                 className="rounded-lg border border-cyan-300/20 bg-cyan-300/10 p-4 text-sm font-semibold text-cyan-100"
               >
-                {badge}
+                {badgeLabels[badge] ?? badge}
               </div>
             ))
           ) : (
