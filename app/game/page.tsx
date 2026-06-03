@@ -11,10 +11,7 @@ import {
   type ProjectOption,
 } from "@/data/projects";
 import { createClient, hasSupabaseConfig } from "@/lib/supabase/client";
-import {
-  getOrCreateProfile,
-  updateProfileProgress,
-} from "@/lib/supabase/profileService";
+import { getOrCreateProfile } from "@/lib/supabase/profileService";
 import {
   getUserProgress,
   insertUserProgress,
@@ -25,6 +22,7 @@ import {
   careerLevels,
   defaultProgress,
   getProgress,
+  progressChangedEvent,
   saveGameProgress,
 } from "@/progressStorage";
 
@@ -387,15 +385,22 @@ export default function GamePage() {
       metrics,
     );
     let newBadges: BadgeName[] = [];
-    let shouldSaveLocalFallback = false;
+    const savedLocalProgress = saveGameProgress(
+      baseResult.earnedXp,
+      nextCareerLevel,
+      earnedBadges,
+      currentProject.id,
+      baseResult.stars,
+    );
+    newBadges = savedLocalProgress.newBadges;
     setCloudError("");
     setCloudStatus("");
+    window.dispatchEvent(new Event(progressChangedEvent));
 
     const supabase = createClient();
 
     if (!supabase) {
       setCloudError("Supabase ortam değişkenleri eksik.");
-      shouldSaveLocalFallback = true;
     } else {
       setIsSavingCloudProgress(true);
       setCloudStatus("Bulut ilerlemesi kaydediliyor...");
@@ -414,23 +419,40 @@ export default function GamePage() {
           setCloudStatus(
             "Supabase oturumu bulunamadı; ilerleme misafir olarak yerel kaydedildi.",
           );
-          shouldSaveLocalFallback = true;
         } else {
-          const profile = await getOrCreateProfile(supabase, sessionUser);
+          const { data: profileData, error: profileError } = await supabase
+            .from("profiles")
+            .upsert(
+              {
+                id: sessionUser.id,
+                email: sessionUser.email ?? null,
+                username:
+                  typeof sessionUser.user_metadata?.username === "string"
+                    ? sessionUser.user_metadata.username
+                    : null,
+                role: "user",
+                total_xp: savedLocalProgress.progress.totalXp,
+                career_level_index:
+                  savedLocalProgress.progress.careerLevelIndex,
+                completed_projects:
+                  savedLocalProgress.progress.completedProjects,
+                earned_badges: savedLocalProgress.progress.earnedBadges,
+                updated_at: new Date().toISOString(),
+              },
+              { onConflict: "id" },
+            )
+            .select("*")
+            .single();
 
-          if (profile.isFallback) {
-            throw new Error("Profil kaydı yüklenemedi veya oluşturulamadı.");
-          }
-
-          const savedProgress = await updateProfileProgress(
-            supabase,
-            sessionUser.id,
-            {
-              earnedXp: baseResult.earnedXp,
-              careerLevelIndex: nextCareerLevel,
-              earnedBadges,
-            },
+          console.log(
+            "Supabase'e başarıyla yazılan yeni puan verisi:",
+            profileData,
           );
+          console.error("Supabase oyun sonu yazma HATASI:", profileError);
+
+          if (profileError) {
+            throw profileError;
+          }
 
           await insertUserProgress(supabase, {
             user_id: sessionUser.id,
@@ -443,7 +465,7 @@ export default function GamePage() {
             final_score: totalScore ?? 0,
           });
 
-          newBadges = savedProgress.newBadges;
+          window.dispatchEvent(new Event(progressChangedEvent));
           setCloudStatus("Bulut ilerlemesi kaydedildi.");
         }
       } catch (error) {
@@ -452,21 +474,9 @@ export default function GamePage() {
         setCloudError(
           `Bulut ilerlemesi kaydedilemedi, ancak yerel ilerlemen güvende. ${message}`,
         );
-        shouldSaveLocalFallback = true;
       } finally {
         setIsSavingCloudProgress(false);
       }
-    }
-
-    if (shouldSaveLocalFallback) {
-      const savedProgress = saveGameProgress(
-        baseResult.earnedXp,
-        nextCareerLevel,
-        earnedBadges,
-        currentProject.id,
-        baseResult.stars,
-      );
-      newBadges = savedProgress.newBadges;
     }
 
     setProjectStars((currentStars) => ({

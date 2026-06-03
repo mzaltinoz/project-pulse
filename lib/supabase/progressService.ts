@@ -76,6 +76,9 @@ export async function insertUserProgress(
     .select("*")
     .single();
 
+  console.log("Supabase'e başarıyla yazılan yeni puan verisi:", data);
+  console.error("Supabase oyun sonu yazma HATASI:", error);
+
   if (error) {
     logSupabaseError("Could not upsert user progress", error);
     throw error;
