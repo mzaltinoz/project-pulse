@@ -63,12 +63,12 @@ export async function insertUserProgress(
 
   const { data, error } = await supabase
     .from("user_progress")
-    .insert(safeRecord)
+    .upsert(safeRecord, { onConflict: "user_id,project_id" })
     .select("*")
     .single();
 
   if (error) {
-    logSupabaseError("Could not insert user progress", error);
+    logSupabaseError("Could not upsert user progress", error);
     throw error;
   }
 

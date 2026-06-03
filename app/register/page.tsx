@@ -4,12 +4,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient, hasSupabaseConfig } from "@/lib/supabase/client";
+import { getAuthErrorMessage } from "@/lib/supabase/authErrors";
+import { syncLocalAndCloudProgress } from "@/lib/supabase/syncProgress";
 
 type RegisterForm = {
   username: string;
   email: string;
   password: string;
 };
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function logSupabaseError(context: string, error: {
   message?: string;
@@ -46,8 +50,24 @@ export default function RegisterPage() {
   async function handleRegister(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!form.username.trim() || !form.email.trim() || !form.password.trim()) {
+    const username = form.username.trim();
+    const email = form.email.trim();
+    const password = form.password;
+
+    if (!username || !email || !password.trim()) {
       setError("Kullanıcı adı, e-posta ve şifre alanlarını doldur.");
+      setMessage("");
+      return;
+    }
+
+    if (!emailRegex.test(email)) {
+      setError("Lütfen geçerli bir e-posta adresi giriniz.");
+      setMessage("");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Şifreniz en az 6 karakter olmalıdır.");
       setMessage("");
       return;
     }
@@ -60,18 +80,32 @@ export default function RegisterPage() {
       return;
     }
 
-    const { data, error: registerError } = await supabase.auth.signUp({
-      email: form.email.trim(),
-      password: form.password,
-      options: {
-        data: {
-          username: form.username.trim(),
+    const { data, error: registerError } = await supabase.auth
+      .signUp({
+        email,
+        password,
+        options: {
+          data: {
+            username,
+          },
         },
-      },
-    });
+      })
+      .catch((requestError: unknown) => {
+        console.error("Supabase register request failed", requestError);
+        return {
+          data: { session: null, user: null },
+          error: new Error("Unexpected Supabase register request failure"),
+        };
+      });
 
     if (registerError) {
-      setError("Kayıt başarısız. Bilgileri kontrol edip tekrar deneyin.");
+      setError(getAuthErrorMessage(registerError));
+      setMessage("");
+      return;
+    }
+
+    if (data.user && data.user.identities?.length === 0) {
+      setError("Bu e-posta adresi zaten kullanımda.");
       setMessage("");
       return;
     }
@@ -79,25 +113,15 @@ export default function RegisterPage() {
     setError("");
 
     if (data.user) {
-      const { error: profileError } = await supabase.from("profiles").upsert(
-        {
-          id: data.user.id,
-          email: data.user.email ?? form.email.trim(),
-          username: form.username.trim(),
-          role: "user",
-          total_xp: 0,
-          career_level_index: 0,
-          completed_projects: 0,
-          earned_badges: [],
-        },
-        { onConflict: "id" },
-      );
-
-      if (profileError) {
-        logSupabaseError("Profile creation failed", profileError);
-        setError(`Profil oluşturulamadı: ${profileError.message}`);
-        setMessage("");
-        return;
+      try {
+        await syncLocalAndCloudProgress(supabase, data.user);
+      } catch (syncError) {
+        logSupabaseError("Progress sync failed after register", {
+          message:
+            syncError instanceof Error
+              ? syncError.message
+              : "Unknown progress sync error",
+        });
       }
     }
 

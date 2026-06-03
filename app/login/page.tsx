@@ -4,11 +4,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient, hasSupabaseConfig } from "@/lib/supabase/client";
+import { getAuthErrorMessage } from "@/lib/supabase/authErrors";
+import { syncLocalAndCloudProgress } from "@/lib/supabase/syncProgress";
 
 type LoginForm = {
   email: string;
   password: string;
 };
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function LoginPage() {
   const router = useRouter();
@@ -49,8 +53,23 @@ export default function LoginPage() {
   async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!form.email.trim() || !form.password.trim()) {
+    const email = form.email.trim();
+    const password = form.password;
+
+    if (!email || !password.trim()) {
       setError("E-posta ve şifre alanlarını doldur.");
+      setNotice("");
+      return;
+    }
+
+    if (!emailRegex.test(email)) {
+      setError("Lütfen geçerli bir e-posta adresi giriniz.");
+      setNotice("");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Şifreniz en az 6 karakter olmalıdır.");
       setNotice("");
       return;
     }
@@ -63,13 +82,21 @@ export default function LoginPage() {
       return;
     }
 
-    const { data, error: loginError } = await supabase.auth.signInWithPassword({
-      email: form.email.trim(),
-      password: form.password,
-    });
+    const { data, error: loginError } = await supabase.auth
+      .signInWithPassword({
+        email,
+        password,
+      })
+      .catch((requestError: unknown) => {
+        console.error("Supabase login request failed", requestError);
+        return {
+          data: { session: null, user: null },
+          error: new Error("Unexpected Supabase login request failure"),
+        };
+      });
 
     if (loginError) {
-      setError("Giriş başarısız. E-posta adresini veya şifreyi kontrol edin.");
+      setError(getAuthErrorMessage(loginError));
       setNotice("");
       return;
     }
@@ -78,6 +105,12 @@ export default function LoginPage() {
       setError("Giriş başarılı görünse de Supabase oturumu oluşmadı.");
       setNotice("");
       return;
+    }
+
+    try {
+      await syncLocalAndCloudProgress(supabase, data.user);
+    } catch (syncError) {
+      console.error("Progress sync failed after login", syncError);
     }
 
     console.log("Supabase login user", {
