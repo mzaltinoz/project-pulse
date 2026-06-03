@@ -21,6 +21,7 @@ export const careerLevels = [
 ];
 
 const storageKey = "project-pulse-progress";
+export const progressChangedEvent = "project-pulse-progress-changed";
 
 export const defaultProgress: ProgressData = {
   totalXp: 0,
@@ -68,6 +69,7 @@ export function getProgress(): ProgressData {
 
 export function saveProgress(progress: ProgressData) {
   window.localStorage.setItem(storageKey, JSON.stringify(progress));
+  window.dispatchEvent(new Event(progressChangedEvent));
 }
 
 export function saveGameProgress(
@@ -112,6 +114,7 @@ export function saveGameProgress(
 
 export function resetProgress() {
   window.localStorage.removeItem(storageKey);
+  window.dispatchEvent(new Event(progressChangedEvent));
 
   return defaultProgress;
 }

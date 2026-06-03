@@ -9,6 +9,7 @@ import {
   careerLevels,
   defaultProgress,
   getProgress,
+  progressChangedEvent,
   resetProgress,
   type ProgressData,
 } from "@/progressStorage";
@@ -17,12 +18,22 @@ export default function Home() {
   const [progress, setProgress] = useState<ProgressData>(defaultProgress);
 
   useEffect(() => {
-    const loadProgress = window.setTimeout(() => {
+    function hydrateProgress() {
       setProgress(getProgress());
+    }
+
+    const loadProgress = window.setTimeout(() => {
+      hydrateProgress();
     }, 0);
+    window.addEventListener(progressChangedEvent, hydrateProgress);
+    window.addEventListener("storage", hydrateProgress);
+    window.addEventListener("pageshow", hydrateProgress);
 
     return () => {
       window.clearTimeout(loadProgress);
+      window.removeEventListener(progressChangedEvent, hydrateProgress);
+      window.removeEventListener("storage", hydrateProgress);
+      window.removeEventListener("pageshow", hydrateProgress);
     };
   }, []);
 
